@@ -308,6 +308,13 @@ QuakeHeap.prototype.removeSmallest = function(dummy)
 				this.minElement = root;
 			}
 		}
+		this.cmd("CreateLabel", this.minID, "Min element", this.minElement.x, QuakeHeap.TMP_PTR_Y);
+		this.cmd("Connect", this.minID, 
+			this.minElement.graphicID,
+			QuakeHeap.FOREGROUND_COLOR,
+			0, // Curve
+			1, // Directed
+			""); // Label
 
 		// Remove the label
 		this.cmd("Delete", moveLabel);
