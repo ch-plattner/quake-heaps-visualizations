@@ -56,7 +56,6 @@ QuakeHeap.TMP_PTR_Y = 60;
 function QuakeHeap(am, w, h)
 {
 	this.init(am, w, h);
-	
 }
 
 QuakeHeap.prototype = new Algorithm();
@@ -159,7 +158,7 @@ QuakeHeap.prototype.moveTree = function(tree)
 	if (tree != null)
 	{
 		this.cmd("Move", tree.graphicID, tree.x, tree.y);
-		this.cmd("Move", tree.internalGraphicID, tree.x, tree.y);
+		// this.cmd("Move", tree.internalGraphicID, tree.x, tree.y);
 		this.cmd("Move", tree.degreeID, tree.x  + QuakeHeap.DEGREE_OFFSET_X, tree.y + QuakeHeap.DEGREE_OFFSET_Y);
 		
 		this.moveTree(tree.leftChild);
@@ -394,15 +393,15 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 	
 	var insertNode = new BinomialNode(insertedValue, this.nextIndex++,  QuakeHeap.INSERT_X, QuakeHeap.INSERT_Y);
 	insertNode.internalGraphicID = this.nextIndex++;
-	insertNode.degreeID= this.nextIndex++;
+	insertNode.degreeID = this.nextIndex++;
 	this.cmd("CreateCircle", insertNode.graphicID, insertedValue, QuakeHeap.INSERT_X, QuakeHeap.INSERT_Y);
 	this.cmd("SetForegroundColor", insertNode.graphicID, QuakeHeap.FOREGROUND_COLOR);
 	this.cmd("SetBackgroundColor", insertNode.graphicID, QuakeHeap.BACKGROUND_COLOR);
 	this.cmd("SetLayer", insertNode.graphicID, 1);
-	this.cmd("CreateCircle", insertNode.internalGraphicID, insertedValue, QuakeHeap.INSERT_X, QuakeHeap.INSERT_Y);
-	this.cmd("SetForegroundColor", insertNode.internalGraphicID, QuakeHeap.FOREGROUND_COLOR);
-	this.cmd("SetBackgroundColor", insertNode.internalGraphicID, QuakeHeap.BACKGROUND_COLOR);
-	this.cmd("SetLayer", insertNode.internalGraphicID, 2);
+	// this.cmd("CreateCircle", insertNode.internalGraphicID, insertedValue, QuakeHeap.INSERT_X, QuakeHeap.INSERT_Y);
+	// this.cmd("SetForegroundColor", insertNode.internalGraphicID, QuakeHeap.FOREGROUND_COLOR);
+	// this.cmd("SetBackgroundColor", insertNode.internalGraphicID, QuakeHeap.BACKGROUND_COLOR);
+	// this.cmd("SetLayer", insertNode.internalGraphicID, 2);
 	this.cmd("CreateLabel", insertNode.degreeID, insertNode.degree, insertNode.x  + QuakeHeap.DEGREE_OFFSET_X, insertNode.y + QuakeHeap.DEGREE_OFFSET_Y);
 	this.cmd("SetTextColor", insertNode.degreeID, "#0000FF");
 	this.cmd("SetLayer", insertNode.degreeID, 2);
@@ -422,12 +421,12 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 				 1, // Directed
 				 ""); // Label
 		
-		this.cmd("Connect", this.minID, 
-				 this.minElement.internalGraphicID,
-				 QuakeHeap.FOREGROUND_COLOR,
-				 0, // Curve
-				 1, // Directed
-				 ""); // Label
+		// this.cmd("Connect", this.minID, 
+		// 		 this.minElement.internalGraphicID,
+		// 		 QuakeHeap.FOREGROUND_COLOR,
+		// 		 0, // Curve
+		// 		 1, // Directed
+		// 		 ""); // Label
 		
 	}
 	else
@@ -439,19 +438,19 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 			insertNode.rightSib = this.treeRoot;
 			this.treeRoot = insertNode;
 			
-			this.cmd("Connect", this.treeRoot.internalGraphicID, 
-					 this.treeRoot.rightSib.internalGraphicID,
-					 QuakeHeap.FOREGROUND_COLOR,
-					 0.15, // Curve
-					 1, // Directed
-					 ""); // Label
+			// this.cmd("Connect", this.treeRoot.internalGraphicID, 
+			// 		 this.treeRoot.rightSib.internalGraphicID,
+			// 		 QuakeHeap.FOREGROUND_COLOR,
+			// 		 0.15, // Curve
+			// 		 1, // Directed
+			// 		 ""); // Label
 			
-			this.cmd("Connect", this.treeRoot.rightSib.internalGraphicID, 
-					 this.treeRoot.internalGraphicID,
-					 QuakeHeap.FOREGROUND_COLOR,
-					 0.15, // Curve
-					 1, // Directed
-					 ""); // Label
+			// this.cmd("Connect", this.treeRoot.rightSib.internalGraphicID, 
+			// 		 this.treeRoot.internalGraphicID,
+			// 		 QuakeHeap.FOREGROUND_COLOR,
+			// 		 0.15, // Curve
+			// 		 1, // Directed
+			// 		 ""); // Label
 			
 			this.cmd("Step");
 			this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
@@ -467,12 +466,12 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 						 1, // Directed
 						 ""); // Label
 				
-				this.cmd("Connect", this.minID, 
-						 this.minElement.internalGraphicID,
-						 QuakeHeap.FOREGROUND_COLOR,
-						 0, // Curve
-						 1, // Directed
-						 ""); // Label
+				// this.cmd("Connect", this.minID, 
+				// 		 this.minElement.internalGraphicID,
+				// 		 QuakeHeap.FOREGROUND_COLOR,
+				// 		 0, // Curve
+				// 		 1, // Directed
+				// 		 ""); // Label
 				
 			}
 			this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
@@ -484,42 +483,42 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 			for (prev = this.treeRoot; prev.rightSib != this.minElement; prev = prev.rightSib) ;
 			
 			
-			this.cmd("Disconnect", prev.internalGraphicID, prev.rightSib.internalGraphicID);
-			this.cmd("Disconnect", prev.rightSib.internalGraphicID, prev.internalGraphicID);
+			// this.cmd("Disconnect", prev.internalGraphicID, prev.rightSib.internalGraphicID);
+			// this.cmd("Disconnect", prev.rightSib.internalGraphicID, prev.internalGraphicID);
 			
 			insertNode.rightSib = prev.rightSib;
 			prev.rightSib = insertNode;
 			
-			this.cmd("Connect", prev.internalGraphicID, 
-					 prev.rightSib.internalGraphicID,
-					 QuakeHeap.FOREGROUND_COLOR,
-					 0.15, // Curve
-					 1, // Directed
-					 ""); // Label
+			// this.cmd("Connect", prev.internalGraphicID, 
+			// 		 prev.rightSib.internalGraphicID,
+			// 		 QuakeHeap.FOREGROUND_COLOR,
+			// 		 0.15, // Curve
+			// 		 1, // Directed
+			// 		 ""); // Label
 			
-			this.cmd("Connect", prev.rightSib.internalGraphicID, 
-					 prev.internalGraphicID,
-					 QuakeHeap.FOREGROUND_COLOR,
-					 0.15, // Curve
-					 1, // Directed
-					 ""); // Label
+			// this.cmd("Connect", prev.rightSib.internalGraphicID, 
+			// 		 prev.internalGraphicID,
+			// 		 QuakeHeap.FOREGROUND_COLOR,
+			// 		 0.15, // Curve
+			// 		 1, // Directed
+			// 		 ""); // Label
 			
 			if (prev.rightSib.rightSib != null)
 			{
 				
-				this.cmd("Connect", prev.rightSib.internalGraphicID, 
-						 prev.rightSib.rightSib.internalGraphicID,
-						 QuakeHeap.FOREGROUND_COLOR,
-						 0.15, // Curve
-						 1, // Directed
-						 ""); // Label
+				// this.cmd("Connect", prev.rightSib.internalGraphicID, 
+				// 		 prev.rightSib.rightSib.internalGraphicID,
+				// 		 QuakeHeap.FOREGROUND_COLOR,
+				// 		 0.15, // Curve
+				// 		 1, // Directed
+				// 		 ""); // Label
 				
-				this.cmd("Connect", prev.rightSib.rightSib.internalGraphicID, 
-						 prev.rightSib.internalGraphicID,
-						 QuakeHeap.FOREGROUND_COLOR,
-						 0.15, // Curve
-						 1, // Directed
-						 ""); // Label				
+				// this.cmd("Connect", prev.rightSib.rightSib.internalGraphicID, 
+				// 		 prev.rightSib.internalGraphicID,
+				// 		 QuakeHeap.FOREGROUND_COLOR,
+				// 		 0.15, // Curve
+				// 		 1, // Directed
+				// 		 ""); // Label				
 			}
 			
 			
@@ -528,7 +527,7 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 			if (this.minElement.data > insertNode.data)
 			{
 				this.cmd("Disconnect", this.minID, this.minElement.graphicID);
-				this.cmd("Disconnect", this.minID, this.minElement.internalGraphicID);
+				// this.cmd("Disconnect", this.minID, this.minElement.internalGraphicID);
 				this.minElement = insertNode;
 				this.cmd("Connect", this.minID, 
 						 this.minElement.graphicID,
@@ -537,12 +536,12 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 						 1, // Directed
 						 ""); // Label
 				
-				this.cmd("Connect", this.minID, 
-						 this.minElement.internalGraphicID,
-						 QuakeHeap.FOREGROUND_COLOR,
-						 0, // Curve
-						 1, // Directed
-						 ""); // Label
+				// this.cmd("Connect", this.minID, 
+				// 		 this.minElement.internalGraphicID,
+				// 		 QuakeHeap.FOREGROUND_COLOR,
+				// 		 0, // Curve
+				// 		 1, // Directed
+				// 		 ""); // Label
 			}
 			this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
 			
