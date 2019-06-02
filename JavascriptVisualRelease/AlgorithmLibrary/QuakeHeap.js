@@ -280,6 +280,8 @@ QuakeHeap.prototype.decreaseKey = function(keys)
 	this.setPositionsByHeight(this.treeRoot, this.height(this.treeRoot), QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
 	this.moveTree(this.treeRoot);
 
+	this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
+
 	return this.commands;
 }
 
