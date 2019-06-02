@@ -319,65 +319,6 @@ QuakeHeap.prototype.removeSmallest = function(dummy)
 		// Remove the label
 		this.cmd("Delete", moveLabel);
 	}
-		// If the treeRoot is null, then we need to make one of the min's children into treeRoot
-	// 	if (this.treeRoot == null) {
-	// 		// Delete the current minElement
-	// 		this.cmd("Delete", this.minElement.graphicID);
-	// 		this.cmd("Delete", this.minElement.degreeID);
-	// 		this.treeRoot = childList;
-	// 		this.minElement = null;
-
-	// 		// Find new minElement
-	// 		if (this.treeRoot != null) {
-	// 			for (tmp = this.treeRoot; tmp != null; tmp = tmp.rightSib) {
-	// 				if (this.minElement == null || this.minElement.data > tmp.data) {
-	// 					this.minElement = tmp;	
-	// 				}
-	// 			}
-	// 			this.cmd("CreateLabel", this.minID, "Min element", this.minElement.x, QuakeHeap.TMP_PTR_Y);
-	// 			this.cmd("Connect", this.minID, 
-	// 					 this.minElement.graphicID,
-	// 					 QuakeHeap.FOREGROUND_COLOR,
-	// 					 0, // Curve
-	// 					 1, // Directed
-	// 					 ""); // Label
-				
-	// 		}
-			
-	// 		this.SetAllTreePositions(this.treeRoot, []);
-	// 		this.MoveAllTrees(this.treeRoot, []);
-	// 		this.cmd("Delete", moveLabel);
-	// 		return this.commands;			
-	// 	}
-	// 	else if (childList == null)
-	// 	{
-	// 		// TODO: empty spot for internal node stuff
-	// 	}
-	// 	else
-	// 	{
-	// 		var tmp;
-	// 		for (tmp = childList; tmp.rightSib != null; tmp = tmp.rightSib) {
-	// 			tmp.parent = null;
-	// 		}
-	// 		tmp.parent = null;
-
-	// 		// TODO:  Add in implementation links
-	// 		if (prev == null) {
-	// 			tmp.rightSib = this.treeRoot;
-	// 			this.treeRoot = childList;				
-	// 		} else {
-	// 			tmp.rightSib = prev.rightSib;
-	// 			prev.rightSib = childList;				
-	// 		}			
-	// 	}
-	// 	this.cmd("Delete", this.minElement.graphicID);
-	// 	this.cmd("Delete", this.minElement.degreeID);
-		
-	// 	this.SetAllTreePositions(this.treeRoot, []);
-	// 	this.MoveAllTrees(this.treeRoot, []);
-	// 	this.fixAfterRemoveMin();
-	// 	this.cmd("Delete", moveLabel);
-	// }
 	return this.commands;
 }
 
