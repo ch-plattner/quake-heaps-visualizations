@@ -62,8 +62,7 @@ QuakeHeap.prototype = new Algorithm();
 QuakeHeap.prototype.constructor = QuakeHeap;
 QuakeHeap.superclass = Algorithm.prototype;
 
-		
-		
+
 QuakeHeap.prototype.init = function(am, w, h)
 {
 	QuakeHeap.superclass.init.call(this, am, w, h);
@@ -109,13 +108,27 @@ QuakeHeap.prototype.addControls =  function()
 	this.controls.push(this.clearHeapButton);
 }
 
+/********************************************************************
+ * EVENT CALLBACKS													*
+ ********************************************************************/
+
+QuakeHeap.prototype.insertCallback = function(event)
+{
+	var insertedValue;
+
+	insertedValue = this.normalizeNumber(this.insertField.value, 4);
+	if (insertedValue != "") {
+		this.insertField.value = "";
+		this.implementAction(this.insertElement.bind(this),insertedValue);
+	}
+}
+
 QuakeHeap.prototype.decreaseKeyCallback = function(event)
 {
 	var oldKey = this.normalizeNumber(this.decreaseKeyOldValueField.value, 4);
 	var newKey = this.normalizeNumber(this.decreaseKeyNewValueField.value, 4);
-	
-	if (oldKey != "" && newKey != "" && newKey < oldKey)
-	{
+
+	if (oldKey != "" && newKey != "" && newKey < oldKey) {
 		this.decreaseKeyOldValueField.value = "";
 		this.decreaseKeyNewValueField.value = "";
 		console.log(oldKey, newKey);
@@ -123,134 +136,130 @@ QuakeHeap.prototype.decreaseKeyCallback = function(event)
 	}
 }
 
-
-QuakeHeap.prototype.setPositionsByHeight = function(tree, height, xPosition, yPosition) 
-{
-	if (tree != null)
-	{
-		if (height == 0)
-		{
-			tree.x = xPosition;
-			tree.y = yPosition;
-			return this.setPositionsByHeight(tree.rightSib, height, xPosition + QuakeHeap.NODE_WIDTH, yPosition);
-		}
-		else if (height == 1)
-		{
-			tree.x = xPosition;
-			tree.y = yPosition;
-			this.setPositions(tree.leftChild, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
-			return this.setPositionsByHeight(tree.rightSib, height, xPosition + QuakeHeap.NODE_WIDTH, yPosition);					
-		}
-		else
-		{
-			var treeWidth = Math.pow(2, height - 1);
-			tree.x = xPosition + (treeWidth - 1) * QuakeHeap.NODE_WIDTH;
-			tree.y = yPosition;
-			this.setPositionsByHeight(tree.leftChild, height - 1, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
-			return this.setPositionsByHeight(tree.rightSib, height, xPosition + treeWidth * QuakeHeap.NODE_WIDTH, yPosition);
-		}
-	}
-	return xPosition;
-}	
-		
-		
-QuakeHeap.prototype.setPositions = function(tree, xPosition, yPosition) 
-{
-	if (tree != null)
-	{
-		if (tree.degree == 0)
-		{
-			tree.x = xPosition;
-			tree.y = yPosition;
-			return this.setPositions(tree.rightSib, xPosition + QuakeHeap.NODE_WIDTH, yPosition);
-		}
-		else if (tree.degree == 1)
-		{
-			tree.x = xPosition;
-			tree.y = yPosition;
-			this.setPositions(tree.leftChild, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
-			return this.setPositions(tree.rightSib, xPosition + QuakeHeap.NODE_WIDTH, yPosition);					
-		}
-		else
-		{
-			var treeWidth = Math.pow(2, tree.degree - 1);
-			tree.x = xPosition + (treeWidth - 1) * QuakeHeap.NODE_WIDTH;
-			tree.y = yPosition;
-			this.setPositions(tree.leftChild, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
-			return this.setPositions(tree.rightSib, xPosition + treeWidth * QuakeHeap.NODE_WIDTH, yPosition);
-		}
-	}
-	return xPosition;
-}
-		
-QuakeHeap.prototype.moveTree = function(tree)
-{
-	if (tree != null)
-	{
-		this.cmd("Move", tree.graphicID, tree.x, tree.y);
-		this.cmd("Move", tree.degreeID, tree.x  + QuakeHeap.DEGREE_OFFSET_X, tree.y + QuakeHeap.DEGREE_OFFSET_Y);
-		
-		this.moveTree(tree.leftChild);
-		this.moveTree(tree.rightSib);
-	}
-}
-
-QuakeHeap.prototype.insertCallback = function(event)
-{
-	var insertedValue;
-	
-	insertedValue = this.normalizeNumber(this.insertField.value, 4);
-	if (insertedValue != "")
-	{
-		this.insertField.value = "";
-		this.implementAction(this.insertElement.bind(this),insertedValue);
-	}
-}
-		
-QuakeHeap.prototype.clearCallback = function(event)
-{
-	this.implementAction(this.clear.bind(this),"");
-}
-		
-QuakeHeap.prototype.clear  = function()
-{
-	this.commands = new Array();
-	
-	
-	this.deleteTree(this.treeRoot);
-	
-	this.cmd("Delete", this.minID);
-	this.nextIndex = 1;
-	this.treeRoot = null;
-	this.minElement = null;
-	return this.commands;
-}
-
-
-QuakeHeap.prototype.deleteTree = function(tree)
-{
-	if (tree != null)
-	{
-		this.cmd("Delete", tree.graphicID);	
-		this.cmd("Delete", tree.degreeID);
-		this.deleteTree(tree.leftChild);
-		this.deleteTree(tree.rightSib);
-	}
-}
-		
-QuakeHeap.prototype.reset = function()
-{
-	this.treeRoot = null;
-	this.nextIndex = 1;
-}
-		
 QuakeHeap.prototype.removeSmallestCallback = function(event)
 {
 	this.implementAction(this.removeSmallest.bind(this),"");
 }
 
+QuakeHeap.prototype.clearCallback = function(event)
+{
+	this.implementAction(this.clear.bind(this),"");
+}
+
+/********************************************************************
+ * MAIN TREE FUNCTIONS	    										*
+ ********************************************************************/
+
+function BinomialNode(val, id, initialX, initialY)		
+{
+	this.data = val;
+	this.x = initialX;
+	this.y = initialY;
+	this.graphicID = id;
+	this.degree = 0;
+	this.leftChild = null;
+	this.rightSib = null;
+	this.parent = null;
+	this.degreeID = -1;
+}
+
+QuakeHeap.prototype.insertElement = function(insertedValue)
+{
+	this.commands = new Array();
+	
+	var insertNode = new BinomialNode(insertedValue, this.nextIndex++,  QuakeHeap.INSERT_X, QuakeHeap.INSERT_Y);
+	// insertNode.internalGraphicID = this.nextIndex++;
+	insertNode.degreeID = this.nextIndex++;
+	this.cmd("CreateCircle", insertNode.graphicID, insertedValue, QuakeHeap.INSERT_X, QuakeHeap.INSERT_Y);
+	this.cmd("SetForegroundColor", insertNode.graphicID, QuakeHeap.FOREGROUND_COLOR);
+	this.cmd("SetBackgroundColor", insertNode.graphicID, QuakeHeap.BACKGROUND_COLOR);
+	this.cmd("SetLayer", insertNode.graphicID, 1);
+	this.cmd("CreateLabel", insertNode.degreeID, insertNode.degree, insertNode.x  + QuakeHeap.DEGREE_OFFSET_X, insertNode.y + QuakeHeap.DEGREE_OFFSET_Y);
+	this.cmd("SetTextColor", insertNode.degreeID, "#0000FF");
+	this.cmd("SetLayer", insertNode.degreeID, 2);
+	this.cmd("Step");
+	
+	if (this.treeRoot == null)
+	{
+		this.treeRoot = insertNode;
+		this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
+		this.moveTree(this.treeRoot);
+		this.cmd("CreateLabel", this.minID, "Min element", this.treeRoot.x, QuakeHeap.TMP_PTR_Y);
+		this.minElement = this.treeRoot;
+		this.cmd("Connect", this.minID, 
+				 this.minElement.graphicID,
+				 QuakeHeap.FOREGROUND_COLOR,
+				 0, // Curve
+				 1, // Directed
+				 ""); // Label
+		
+	}
+	else
+	{
+		var  tmp;
+		var prev;
+		
+		if (this.minElement == this.treeRoot) {
+			insertNode.rightSib = this.treeRoot;
+			this.treeRoot = insertNode;
+			
+			this.cmd("Step");
+			this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
+			if (this.minElement.data > insertNode.data)
+			{
+				this.cmd("Disconnect", this.minID, this.minElement.graphicID);
+				// this.cmd("Disconnect", this.minID, this.minElement.internalGraphicID);
+				this.minElement = insertNode;
+				this.cmd("Connect", this.minID, 
+						 this.minElement.graphicID,
+						 QuakeHeap.FOREGROUND_COLOR,
+						 0, // Curve
+						 1, // Directed
+						 ""); // Label
+				
+			}
+			this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
+			this.moveTree(this.treeRoot);
+			
+		} 
+		else 
+		{
+			for (prev = this.treeRoot; prev.rightSib != this.minElement; prev = prev.rightSib) ;
+			
+			insertNode.rightSib = prev.rightSib;
+			prev.rightSib = insertNode;
+			
+			this.cmd("Step");
+			this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
+			if (this.minElement.data > insertNode.data)
+			{
+				this.cmd("Disconnect", this.minID, this.minElement.graphicID);
+				// this.cmd("Disconnect", this.minID, this.minElement.internalGraphicID);
+				this.minElement = insertNode;
+				this.cmd("Connect", this.minID, 
+						 this.minElement.graphicID,
+						 QuakeHeap.FOREGROUND_COLOR,
+						 0, // Curve
+						 1, // Directed
+						 ""); // Label
+			}
+			this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
+			
+			this.moveTree(this.treeRoot);
+
+		}
+		
+	}
+	
+	return this.commands;
+}
+
 QuakeHeap.prototype.decreaseKey = function(oldKey, newKey)
 {
+	// TODO:
+	// - fix error that min element label not moving
+	// - traverse tree to update label for entire path
+
 	this.commands = new Array();
 
 	var root;
@@ -302,8 +311,8 @@ QuakeHeap.prototype.decreaseKey = function(oldKey, newKey)
 	this.moveTree(this.treeRoot);
 
 	return this.commands;
-}		
-		
+}
+
 QuakeHeap.prototype.removeSmallest = function(dummy)
 {
 	this.commands = new Array();
@@ -404,41 +413,29 @@ QuakeHeap.prototype.removeSmallest = function(dummy)
 	return this.commands;
 }
 
-QuakeHeap.prototype.height = function(root)
+QuakeHeap.prototype.clear  = function()
 {
-	var height = 0;
-	while (root != null) {
-		height++;
-		root = root.leftChild;
-	}
-	return height;
+	this.commands = new Array();
+	this.deleteTree(this.treeRoot);
+	this.cmd("Delete", this.minID);
+	this.nextIndex = 1;
+	this.treeRoot = null;
+	this.minElement = null;
+	return this.commands;
 }
 
-QuakeHeap.prototype.printRootlist = function() {
-	console.log("Printing rootlist: ");
-	for (var root = this.treeRoot; root != null; root = root.rightSib) {
-		var nodeInfo = {
-			'data': root.data,
-			'leftChild': (root.leftChild != null) ? root.leftChild.data : "null",
-			'rightSib': (root.rightSib != null) ? root.rightSib.data : "null",
-			'parent': (root.parent != null) ? root.parent.data : "null"
-		};
-		console.log(nodeInfo);
-	}
-	console.log();
+QuakeHeap.prototype.reset = function()
+{
+	this.treeRoot = null;
+	this.nextIndex = 1;
 }
 
-QuakeHeap.prototype.removeFromRootList = function(root) {
-	// Find the minElement in the linked list of roots and remove it from the list
-	if (root == this.treeRoot) {
-		this.treeRoot = this.treeRoot.rightSib;
-	} else {
-		for (var prev = this.treeRoot; prev.rightSib != root; prev = prev.rightSib);
-		prev.rightSib = prev.rightSib.rightSib; // Rewire prev to skip over root
-	}
-}
+/********************************************************************
+ * MAIN TREE HELPER FUNCTIONS	    							    *
+ ********************************************************************/
 
-QuakeHeap.prototype.linkTwoTrees = function(heightMap) {
+QuakeHeap.prototype.linkTwoTrees = function(heightMap)
+{
 	// find min height that has > 1 tree
 	var minH = 0;
 	var keys = Object.keys(heightMap);
@@ -566,97 +563,126 @@ QuakeHeap.prototype.LinkAllTrees = function()
 		if (!didLink) break;
 	}
 }
-		
-		
-QuakeHeap.prototype.insertElement = function(insertedValue)
-{
-	this.commands = new Array();
-	
-	var insertNode = new BinomialNode(insertedValue, this.nextIndex++,  QuakeHeap.INSERT_X, QuakeHeap.INSERT_Y);
-	// insertNode.internalGraphicID = this.nextIndex++;
-	insertNode.degreeID = this.nextIndex++;
-	this.cmd("CreateCircle", insertNode.graphicID, insertedValue, QuakeHeap.INSERT_X, QuakeHeap.INSERT_Y);
-	this.cmd("SetForegroundColor", insertNode.graphicID, QuakeHeap.FOREGROUND_COLOR);
-	this.cmd("SetBackgroundColor", insertNode.graphicID, QuakeHeap.BACKGROUND_COLOR);
-	this.cmd("SetLayer", insertNode.graphicID, 1);
-	this.cmd("CreateLabel", insertNode.degreeID, insertNode.degree, insertNode.x  + QuakeHeap.DEGREE_OFFSET_X, insertNode.y + QuakeHeap.DEGREE_OFFSET_Y);
-	this.cmd("SetTextColor", insertNode.degreeID, "#0000FF");
-	this.cmd("SetLayer", insertNode.degreeID, 2);
-	this.cmd("Step");
-	
-	if (this.treeRoot == null)
-	{
-		this.treeRoot = insertNode;
-		this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
-		this.moveTree(this.treeRoot);
-		this.cmd("CreateLabel", this.minID, "Min element", this.treeRoot.x, QuakeHeap.TMP_PTR_Y);
-		this.minElement = this.treeRoot;
-		this.cmd("Connect", this.minID, 
-				 this.minElement.graphicID,
-				 QuakeHeap.FOREGROUND_COLOR,
-				 0, // Curve
-				 1, // Directed
-				 ""); // Label
-		
-	}
-	else
-	{
-		var  tmp;
-		var prev;
-		
-		if (this.minElement == this.treeRoot) {
-			insertNode.rightSib = this.treeRoot;
-			this.treeRoot = insertNode;
-			
-			this.cmd("Step");
-			this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
-			if (this.minElement.data > insertNode.data)
-			{
-				this.cmd("Disconnect", this.minID, this.minElement.graphicID);
-				// this.cmd("Disconnect", this.minID, this.minElement.internalGraphicID);
-				this.minElement = insertNode;
-				this.cmd("Connect", this.minID, 
-						 this.minElement.graphicID,
-						 QuakeHeap.FOREGROUND_COLOR,
-						 0, // Curve
-						 1, // Directed
-						 ""); // Label
-				
-			}
-			this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
-			this.moveTree(this.treeRoot);
-			
-		} 
-		else 
-		{
-			for (prev = this.treeRoot; prev.rightSib != this.minElement; prev = prev.rightSib) ;
-			
-			insertNode.rightSib = prev.rightSib;
-			prev.rightSib = insertNode;
-			
-			this.cmd("Step");
-			this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
-			if (this.minElement.data > insertNode.data)
-			{
-				this.cmd("Disconnect", this.minID, this.minElement.graphicID);
-				// this.cmd("Disconnect", this.minID, this.minElement.internalGraphicID);
-				this.minElement = insertNode;
-				this.cmd("Connect", this.minID, 
-						 this.minElement.graphicID,
-						 QuakeHeap.FOREGROUND_COLOR,
-						 0, // Curve
-						 1, // Directed
-						 ""); // Label
-			}
-			this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
-			
-			this.moveTree(this.treeRoot);
 
-		}
-		
+QuakeHeap.prototype.height = function(root)
+{
+	var height = 0;
+	while (root != null) {
+		height++;
+		root = root.leftChild;
 	}
+	return height;
+}
+
+QuakeHeap.prototype.printRootlist = function()
+{
+	console.log("Printing rootlist: ");
+	for (var root = this.treeRoot; root != null; root = root.rightSib) {
+		var nodeInfo = {
+			'data': root.data,
+			'leftChild': (root.leftChild != null) ? root.leftChild.data : "null",
+			'rightSib': (root.rightSib != null) ? root.rightSib.data : "null",
+			'parent': (root.parent != null) ? root.parent.data : "null"
+		};
+		console.log(nodeInfo);
+	}
+	console.log();
+}
+
+QuakeHeap.prototype.removeFromRootList = function(root)
+{
+	// Find the minElement in the linked list of roots and remove it from the list
+	if (root == this.treeRoot) {
+		this.treeRoot = this.treeRoot.rightSib;
+	} else {
+		for (var prev = this.treeRoot; prev.rightSib != root; prev = prev.rightSib);
+		prev.rightSib = prev.rightSib.rightSib; // Rewire prev to skip over root
+	}
+}
+
+/********************************************************************
+ * TREE ANIMATION HELPER FUNCTIONS	    							*
+ ********************************************************************/
+
+QuakeHeap.prototype.setPositionsByHeight = function(tree, height, xPosition, yPosition) 
+{
+	if (tree != null)
+	{
+		if (height == 0)
+		{
+			tree.x = xPosition;
+			tree.y = yPosition;
+			return this.setPositionsByHeight(tree.rightSib, height, xPosition + QuakeHeap.NODE_WIDTH, yPosition);
+		}
+		else if (height == 1)
+		{
+			tree.x = xPosition;
+			tree.y = yPosition;
+			this.setPositions(tree.leftChild, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
+			return this.setPositionsByHeight(tree.rightSib, height, xPosition + QuakeHeap.NODE_WIDTH, yPosition);					
+		}
+		else
+		{
+			var treeWidth = Math.pow(2, height - 1);
+			tree.x = xPosition + (treeWidth - 1) * QuakeHeap.NODE_WIDTH;
+			tree.y = yPosition;
+			this.setPositionsByHeight(tree.leftChild, height - 1, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
+			return this.setPositionsByHeight(tree.rightSib, height, xPosition + treeWidth * QuakeHeap.NODE_WIDTH, yPosition);
+		}
+	}
+	return xPosition;
+}	
 	
-	return this.commands;
+QuakeHeap.prototype.setPositions = function(tree, xPosition, yPosition) 
+{
+	if (tree != null)
+	{
+		if (tree.degree == 0)
+		{
+			tree.x = xPosition;
+			tree.y = yPosition;
+			return this.setPositions(tree.rightSib, xPosition + QuakeHeap.NODE_WIDTH, yPosition);
+		}
+		else if (tree.degree == 1)
+		{
+			tree.x = xPosition;
+			tree.y = yPosition;
+			this.setPositions(tree.leftChild, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
+			return this.setPositions(tree.rightSib, xPosition + QuakeHeap.NODE_WIDTH, yPosition);					
+		}
+		else
+		{
+			var treeWidth = Math.pow(2, tree.degree - 1);
+			tree.x = xPosition + (treeWidth - 1) * QuakeHeap.NODE_WIDTH;
+			tree.y = yPosition;
+			this.setPositions(tree.leftChild, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
+			return this.setPositions(tree.rightSib, xPosition + treeWidth * QuakeHeap.NODE_WIDTH, yPosition);
+		}
+	}
+	return xPosition;
+}
+		
+QuakeHeap.prototype.moveTree = function(tree)
+{
+	if (tree != null)
+	{
+		this.cmd("Move", tree.graphicID, tree.x, tree.y);
+		this.cmd("Move", tree.degreeID, tree.x  + QuakeHeap.DEGREE_OFFSET_X, tree.y + QuakeHeap.DEGREE_OFFSET_Y);
+		
+		this.moveTree(tree.leftChild);
+		this.moveTree(tree.rightSib);
+	}
+}
+
+QuakeHeap.prototype.deleteTree = function(tree)
+{
+	if (tree != null)
+	{
+		this.cmd("Delete", tree.graphicID);	
+		this.cmd("Delete", tree.degreeID);
+		this.deleteTree(tree.leftChild);
+		this.deleteTree(tree.rightSib);
+	}
 }
 
 QuakeHeap.prototype.MoveAllTrees = function(tree, treeList, tree2)
@@ -692,6 +718,10 @@ QuakeHeap.prototype.SetAllTreePositions = function(tree, treeList, tree2)
 	}
 }
 
+/********************************************************************
+ * MISC HELPER FUNCTIONS	    							        *
+ ********************************************************************/
+
 QuakeHeap.prototype.enableUI = function(event)
 {
 	for (var i = 0; i < this.controls.length; i++) {
@@ -706,28 +736,10 @@ QuakeHeap.prototype.disableUI = function(event)
 	}
 }
 
-
-
 var currentAlg;
 
 function init()
 {
 	var animManag = initCanvas();
 	currentAlg = new QuakeHeap(animManag, canvas.width, canvas.height);
-}
-
-
-
-		
-function BinomialNode(val, id, initialX, initialY)		
-{
-	this.data = val;
-	this.x = initialX;
-	this.y = initialY;
-	this.graphicID = id;
-	this.degree = 0;
-	this.leftChild = null;
-	this.rightSib = null;
-	this.parent = null;
-	this.degreeID = -1;
 }
