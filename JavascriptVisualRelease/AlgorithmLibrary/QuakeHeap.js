@@ -429,8 +429,6 @@ QuakeHeap.prototype.linkTwoTrees = function(heightMap)
 	var keys = Object.keys(heightMap);
 	keys.sort(); //((a, b) => a - b);
 
-	console.log(keys);
-
 	for (var i = 0; i < keys.length; i++) {
 		if (heightMap[keys[i]].length > 1) {
 			minH = keys[i];
@@ -438,10 +436,6 @@ QuakeHeap.prototype.linkTwoTrees = function(heightMap)
 		}
 	}
 	if (minH == 0) return false; // didn't link any trees
-
-	console.log("not 0");
-
-	this.printRootlist();
 
 	// find the two trees to link
 	var root1 = heightMap[minH].shift();
@@ -452,10 +446,7 @@ QuakeHeap.prototype.linkTwoTrees = function(heightMap)
 
 	// remove them both from treelist
 	this.removeFromRootList(root1);
-	this.printRootlist();
-
 	this.removeFromRootList(root2);
-	this.printRootlist();
 	
 	// move them to the front
 	if (root1.data < root2.data) {
@@ -467,9 +458,6 @@ QuakeHeap.prototype.linkTwoTrees = function(heightMap)
 		root1.rightSib = this.treeRoot;
 		this.treeRoot = root2;
 	}
-
-	console.log("Moved roots to the front of the list");
-	this.printRootlist();
 
 	// create new min node
 	var minVal = this.treeRoot.data;
@@ -501,6 +489,8 @@ QuakeHeap.prototype.linkTwoTrees = function(heightMap)
 		heightMap[newH] = [minNode];
 	}
 
+	this.cmd("Step");
+
 	this.setPositionsByHeight(minNode, newH, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
 	this.moveTree(minNode);
 
@@ -518,8 +508,7 @@ QuakeHeap.prototype.linkTwoTrees = function(heightMap)
 		 1, // Directed
 		 ""); // Label
 
-	console.log("Finished product");
-	this.printRootlist();
+	this.cmd("Step");
 
 	return true; // we linked 2 trees!
 }
