@@ -79,6 +79,8 @@ QuakeHeap.prototype.init = function(am, w, h)
 QuakeHeap.prototype.addControls =  function()
 {
 	this.controls = [];
+
+	// Increase key text input and button
 	this.insertField = addControlToAlgorithmBar("Text", "");
 	this.insertField.onkeydown = this.returnSubmit(this.insertField,  this.insertCallback.bind(this), 4);
 	this.controls.push(this.insertField);
@@ -87,13 +89,38 @@ QuakeHeap.prototype.addControls =  function()
 	this.insertButton.onclick = this.insertCallback.bind(this);
 	this.controls.push(this.insertButton);
 
+	// Decrease key text inputs and button
+	this.decreaseKeyOldValueField = addControlToAlgorithmBar("Text", "Key to decrease");
+	this.controls.push(this.decreaseKeyOldValueField);
+	this.decreaseKeyNewValueField = addControlToAlgorithmBar("Text", "New key value");
+	this.controls.push(this.decreaseKeyNewValueField);
+	this.decreaseKeyButton = addControlToAlgorithmBar("Button", "Decrease Key");
+	this.decreaseKeyButton.onclick = this.decreaseKeyCallback.bind(this);
+	this.controls.push(this.decreaseKeyButton);
+
+	// Remove smallest key button
 	this.removeSmallestButton = addControlToAlgorithmBar("Button", "Remove Smallest");
 	this.removeSmallestButton.onclick = this.removeSmallestCallback.bind(this);
 	this.controls.push(this.removeSmallestButton);
 
+	// Clear entire heap button
 	this.clearHeapButton = addControlToAlgorithmBar("Button", "Clear Heap");
 	this.clearHeapButton.onclick = this.clearCallback.bind(this);
 	this.controls.push(this.clearHeapButton);
+}
+
+QuakeHeap.prototype.decreaseKeyCallback = function(event)
+{
+	var oldKey = this.normalizeNumber(this.decreaseKeyOldValueField.value, 4);
+	var newKey = this.normalizeNumber(this.decreaseKeyNewValueField.value, 4);
+	
+	if (oldKey != "" && newKey != "" && newKey < oldKey)
+	{
+		this.decreaseKeyOldValueField.value = "";
+		this.decreaseKeyNewValueField.value = "";
+		console.log(oldKey, newKey);
+		this.implementAction(this.decreaseKey.bind(this), oldKey, newKey);
+	}
 }
 
 
@@ -168,7 +195,6 @@ QuakeHeap.prototype.moveTree = function(tree)
 	}
 }
 
-
 QuakeHeap.prototype.insertCallback = function(event)
 {
 	var insertedValue;
@@ -223,7 +249,60 @@ QuakeHeap.prototype.removeSmallestCallback = function(event)
 	this.implementAction(this.removeSmallest.bind(this),"");
 }
 
-		
+QuakeHeap.prototype.decreaseKey = function(oldKey, newKey)
+{
+	this.commands = new Array();
+
+	var root;
+	var isFound = false;
+	for (root = this.treeRoot; root != null && !isFound; root = root.rightSib) {
+		var curr = root;
+		while (curr != null) {
+			console.log(curr.data);
+			if (curr.data == oldKey) {
+				curr.data = this.normalizeNumber(curr.data - 1, 4);
+
+				isFound = true;
+
+				var parent = curr.parent;
+				if (parent != null) {
+					if (parent.leftChild == curr) {
+						parent.leftChild = curr.rightSib;
+					} else {
+						parent.leftChild.rightSib = null;
+					}
+					this.cmd("Disconnect", parent.graphicID, curr.graphicID);
+				}
+
+				if (curr != root) {
+					curr.parent = null;
+					curr.rightSib = this.treeRoot;
+					this.treeRoot = curr;
+				}
+
+				break;
+			} else {
+				// check children
+				if (curr.leftChild == null) break;
+				if (oldKey < curr.data) {
+					curr = curr.leftChild;
+				} else {
+					curr = curr.leftChild.rightSib;
+				}
+			}
+		}
+	}
+
+	this.printRootlist();
+
+	this.SetAllTreePositions(this.treeRoot, []);
+	this.MoveAllTrees(this.treeRoot, []);
+
+	this.setPositionsByHeight(this.treeRoot, this.height(this.treeRoot), QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
+	this.moveTree(this.treeRoot);
+
+	return this.commands;
+}		
 		
 QuakeHeap.prototype.removeSmallest = function(dummy)
 {
@@ -308,13 +387,16 @@ QuakeHeap.prototype.removeSmallest = function(dummy)
 				this.minElement = root;
 			}
 		}
-		this.cmd("CreateLabel", this.minID, "Min element", this.minElement.x, QuakeHeap.TMP_PTR_Y);
-		this.cmd("Connect", this.minID, 
-			this.minElement.graphicID,
-			QuakeHeap.FOREGROUND_COLOR,
-			0, // Curve
-			1, // Directed
-			""); // Label
+
+		if (this.minElement != null) {
+			this.cmd("CreateLabel", this.minID, "Min element", this.minElement.x, QuakeHeap.TMP_PTR_Y);
+			this.cmd("Connect", this.minID, 
+				this.minElement.graphicID,
+				QuakeHeap.FOREGROUND_COLOR,
+				0, // Curve
+				1, // Directed
+				""); // Label
+		}
 
 		// Remove the label
 		this.cmd("Delete", moveLabel);
