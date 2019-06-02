@@ -189,7 +189,6 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 				 0, // Curve
 				 1, // Directed
 				 ""); // Label
-		
 	} else {
 		var  tmp;
 		var prev;
@@ -200,18 +199,7 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 			
 			this.cmd("Step");
 			this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
-			if (this.minElement.data > insertNode.data) {
-				this.cmd("Disconnect", this.minID, this.minElement.graphicID);
-				this.minElement = insertNode;
-				this.cmd("Connect", this.minID, 
-						 this.minElement.graphicID,
-						 QuakeHeap.FOREGROUND_COLOR,
-						 0, // Curve
-						 1, // Directed
-						 ""); // Label
-				
-			}
-			this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
+			this.maybeUpdateMinLabel(insertNode);
 			this.moveTree(this.treeRoot);
 			
 		} else {
@@ -222,17 +210,7 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 			
 			this.cmd("Step");
 			this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
-			if (this.minElement.data > insertNode.data) {
-				this.cmd("Disconnect", this.minID, this.minElement.graphicID);
-				this.minElement = insertNode;
-				this.cmd("Connect", this.minID, 
-						 this.minElement.graphicID,
-						 QuakeHeap.FOREGROUND_COLOR,
-						 0, // Curve
-						 1, // Directed
-						 ""); // Label
-			}
-			this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
+			this.maybeUpdateMinLabel(insertNode);
 			this.moveTree(this.treeRoot);
 		}
 	}
@@ -595,7 +573,6 @@ QuakeHeap.prototype.maybeUpdateMinLabel = function(node)
 				 ""); // Label
 	}
 	this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
-	this.moveTree(this.treeRoot);
 }
 
 /********************************************************************
