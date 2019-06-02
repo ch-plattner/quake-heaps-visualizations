@@ -94,31 +94,6 @@ QuakeHeap.prototype.addControls =  function()
 	this.clearHeapButton = addControlToAlgorithmBar("Button", "Clear Heap");
 	this.clearHeapButton.onclick = this.clearCallback.bind(this);
 	this.controls.push(this.clearHeapButton);
-	
-	var radioButtonList = addRadioButtonGroupToAlgorithmBar(["Logical Representation", 
-															 "Internal Representation", 
-															 ], 
-															"BQueueRep");
-	
-	radioButtonList[0].onclick = this.representationChangedHandler.bind(this, true);
-	radioButtonList[1].onclick = this.representationChangedHandler.bind(this, false);
-	radioButtonList[0].checked = true;
-	
-}
-		
-		
-QuakeHeap.prototype.representationChangedHandler = function(logicalRep, event) 
-{
-	if (logicalRep)
-	{
-		this.animationManager.setAllLayers([0,1]);
-		this.currentLayer = 1;
-	}
-	else 
-	{
-		this.animationManager.setAllLayers([0,2]);
-		this.currentLayer = 2;
-	}
 }
 
 
