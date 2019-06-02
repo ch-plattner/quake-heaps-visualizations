@@ -226,97 +226,287 @@ QuakeHeap.prototype.removeSmallest = function(dummy)
 {
 	this.commands = new Array();
 	
-	if (this.treeRoot != null)
-	{
+	if (this.treeRoot != null) {
 		var  tmp;
 		var prev;
 		
-		
-		
+		// Find the minElement in the linked list of roots and remove it from the list
+		console.log('minElement', this.minElement);
+
 		if (this.minElement == this.treeRoot) {
 			this.treeRoot = this.treeRoot.rightSib;
 			prev = null;
-		} 
-		else 
-		{
-			for (prev = this.treeRoot; prev.rightSib != this.minElement; prev = prev.rightSib) ;
-			prev.rightSib = prev.rightSib.rightSib;
-			
+		} else {
+			for (prev = this.treeRoot; prev.rightSib != this.minElement; prev = prev.rightSib);
+			prev.rightSib = prev.rightSib.rightSib; // Rewire prev to skip over this.minElement
 		}
+
+		console.log("Removed min element");
+		this.printRootlist();
+
+		
+		// Copy the node's key label and move it to the upper left corner
 		var moveLabel = this.nextIndex++;
 		this.cmd("SetText", this.minElement.graphicID, "");
 		this.cmd("CreateLabel", moveLabel, this.minElement.data, this.minElement.x, this.minElement.y);
 		this.cmd("Move", moveLabel, QuakeHeap.DELETE_LAB_X, QuakeHeap.DELETE_LAB_Y);
 		this.cmd("Step");
 		this.cmd("Delete", this.minID);
-		var childList = this.minElement.leftChild;
-		if (this.treeRoot == null)
-		{
-			this.cmd("Delete", this.minElement.graphicID);
-			this.cmd("Delete", this.minElement.degreeID);
-			this.treeRoot = childList;
-			this.minElement = null;
-			if (this.treeRoot != null)
-			{
-				for (tmp = this.treeRoot; tmp != null; tmp = tmp.rightSib)
-				{
-					if (this.minElement == null || this.minElement.data > tmp.data)
-					{
-						this.minElement = tmp;
-						
-					}
-				}
-				this.cmd("CreateLabel", this.minID, "Min element", this.minElement.x, QuakeHeap.TMP_PTR_Y);
-				this.cmd("Connect", this.minID, 
-						 this.minElement.graphicID,
-						 QuakeHeap.FOREGROUND_COLOR,
-						 0, // Curve
-						 1, // Directed
-						 ""); // Label
-				
-			}
-			
-				this.SetAllTreePositions(this.treeRoot, []);
-				this.MoveAllTrees(this.treeRoot, []);
-			this.cmd("Delete", moveLabel);
-				return this.commands;			
-			
-			
-		}
-		else if (childList == null)
-		{
-			// TODO: empty spot for internal node stuff
-		}
-		else
-		{
-			var tmp;
-			for (tmp = childList; tmp.rightSib != null; tmp = tmp.rightSib)
-			{
-				tmp.parent = null;
-			}
-			tmp.parent = null;
 
-			// TODO:  Add in implementation links
-			if (prev == null)
-			{
-				tmp.rightSib = this.treeRoot;
-				this.treeRoot = childList;				
-			}
-			else
-			{
-				tmp.rightSib = prev.rightSib;
-				prev.rightSib = childList;				
-			}			
-		}
+		// Delete the current minElement
 		this.cmd("Delete", this.minElement.graphicID);
 		this.cmd("Delete", this.minElement.degreeID);
 		
+		// Remove all nodes in the tree rooted at minElement which contain the minElement
+		var leftChild = this.minElement.leftChild;
+		var rightChild;
+		while (leftChild != null) {
+			rightChild = leftChild.rightSib;
+			if (leftChild.data == this.minElement.data) {
+				if (rightChild != null) {
+					tmp = rightChild;
+					tmp.parent = null;
+					tmp.rightSib = this.treeRoot;
+					this.treeRoot = tmp;
+				}
+				this.cmd("Delete", leftChild.graphicID);
+				this.cmd("Delete", leftChild.degreeID);
+				leftChild = leftChild.leftChild;
+			} else {
+				// If we get here, we are guaranteed to have a rightchild
+				this.cmd("Delete", rightChild.graphicID);
+				this.cmd("Delete", rightChild.degreeID);
+
+				tmp = leftChild;
+				tmp.parent = null;
+				tmp.rightSib = this.treeRoot;
+				this.treeRoot = tmp;
+
+				leftChild = rightChild.leftChild;
+			}
+		}
+
+		console.log("traversed tree");
+		this.printRootlist();
+
+		// Link trees
+
+		// Find new minElement
+
 		this.SetAllTreePositions(this.treeRoot, []);
 		this.MoveAllTrees(this.treeRoot, []);
-		this.fixAfterRemoveMin();
+		this.LinkAllTrees();
+		// this.fixAfterRemoveMin();
+
+		// Remove the label
 		this.cmd("Delete", moveLabel);
 	}
+		// If the treeRoot is null, then we need to make one of the min's children into treeRoot
+	// 	if (this.treeRoot == null) {
+	// 		// Delete the current minElement
+	// 		this.cmd("Delete", this.minElement.graphicID);
+	// 		this.cmd("Delete", this.minElement.degreeID);
+	// 		this.treeRoot = childList;
+	// 		this.minElement = null;
+
+	// 		// Find new minElement
+	// 		if (this.treeRoot != null) {
+	// 			for (tmp = this.treeRoot; tmp != null; tmp = tmp.rightSib) {
+	// 				if (this.minElement == null || this.minElement.data > tmp.data) {
+	// 					this.minElement = tmp;	
+	// 				}
+	// 			}
+	// 			this.cmd("CreateLabel", this.minID, "Min element", this.minElement.x, QuakeHeap.TMP_PTR_Y);
+	// 			this.cmd("Connect", this.minID, 
+	// 					 this.minElement.graphicID,
+	// 					 QuakeHeap.FOREGROUND_COLOR,
+	// 					 0, // Curve
+	// 					 1, // Directed
+	// 					 ""); // Label
+				
+	// 		}
+			
+	// 		this.SetAllTreePositions(this.treeRoot, []);
+	// 		this.MoveAllTrees(this.treeRoot, []);
+	// 		this.cmd("Delete", moveLabel);
+	// 		return this.commands;			
+	// 	}
+	// 	else if (childList == null)
+	// 	{
+	// 		// TODO: empty spot for internal node stuff
+	// 	}
+	// 	else
+	// 	{
+	// 		var tmp;
+	// 		for (tmp = childList; tmp.rightSib != null; tmp = tmp.rightSib) {
+	// 			tmp.parent = null;
+	// 		}
+	// 		tmp.parent = null;
+
+	// 		// TODO:  Add in implementation links
+	// 		if (prev == null) {
+	// 			tmp.rightSib = this.treeRoot;
+	// 			this.treeRoot = childList;				
+	// 		} else {
+	// 			tmp.rightSib = prev.rightSib;
+	// 			prev.rightSib = childList;				
+	// 		}			
+	// 	}
+	// 	this.cmd("Delete", this.minElement.graphicID);
+	// 	this.cmd("Delete", this.minElement.degreeID);
+		
+	// 	this.SetAllTreePositions(this.treeRoot, []);
+	// 	this.MoveAllTrees(this.treeRoot, []);
+	// 	this.fixAfterRemoveMin();
+	// 	this.cmd("Delete", moveLabel);
+	// }
 	return this.commands;
+}
+
+QuakeHeap.prototype.height = function(root)
+{
+	var height = 0;
+	while (root != null) {
+		height++;
+		root = root.leftChild;
+	}
+	return height;
+}
+
+QuakeHeap.prototype.printRootlist = function() {
+	console.log("Printing rootlist: ");
+	for (var root = this.treeRoot; root != null; root = root.rightSib) {
+		var nodeInfo = {
+			'data': root.data,
+			'leftChild': (root.leftChild != null) ? root.leftChild.data : "null",
+			'rightSib': (root.rightSib != null) ? root.rightSib.data : "null",
+			'parent': (root.parent != null) ? root.parent.data : "null"
+		};
+		console.log(nodeInfo);
+	}
+	console.log();
+}
+
+QuakeHeap.prototype.removeFromRootList = function(root) {
+	// Find the minElement in the linked list of roots and remove it from the list
+	if (root == this.treeRoot) {
+		this.treeRoot = this.treeRoot.rightSib;
+	} else {
+		for (var prev = this.treeRoot; prev.rightSib != root; prev = prev.rightSib);
+		prev.rightSib = prev.rightSib.rightSib; // Rewire prev to skip over root
+	}
+}
+
+QuakeHeap.prototype.linkTwoTrees = function(heightMap) {
+	// find min height that has > 1 tree
+	var minH = 0;
+	var keys = Object.keys(heightMap);
+	keys.sort(); //((a, b) => a - b);
+
+	console.log(keys);
+
+	for (var i = 0; i < keys.length; i++) {
+		if (heightMap[keys[i]].length > 1) {
+			minH = keys[i];
+			break;
+		}
+	}
+	if (minH == 0) return false; // didn't link any trees
+
+	console.log("not 0");
+
+	this.printRootlist();
+
+	// find the two trees to link
+	var root1 = heightMap[minH].shift();
+	var root2 = heightMap[minH].shift();
+	if (heightMap[minH].length == 0) {
+		delete heightMap[minH];
+	}
+
+	// remove them both from treelist
+	this.removeFromRootList(root1);
+	this.printRootlist();
+
+	this.removeFromRootList(root2);
+	this.printRootlist();
+	
+	// move them to the front
+	if (root1.data < root2.data) {
+		root1.rightSib = root2;
+		root2.rightSib = this.treeRoot;
+		this.treeRoot = root1;
+	} else {
+		root2.rightSib = root1;
+		root1.rightSib = this.treeRoot;
+		this.treeRoot = root2;
+	}
+
+	console.log("Moved roots to the front of the list");
+	this.printRootlist();
+
+	// create new min node
+	var minVal = this.treeRoot.data;
+	var minNode = new BinomialNode(minVal, this.nextIndex++,  QuakeHeap.INSERT_X, QuakeHeap.INSERT_Y);
+	minNode.degreeID = this.nextIndex++;
+	this.cmd("CreateCircle", minNode.graphicID, minVal, QuakeHeap.INSERT_X, QuakeHeap.INSERT_Y);
+	this.cmd("SetForegroundColor", minNode.graphicID, QuakeHeap.FOREGROUND_COLOR);
+	this.cmd("SetBackgroundColor", minNode.graphicID, QuakeHeap.BACKGROUND_COLOR);
+	this.cmd("SetLayer", minNode.graphicID, 1);
+	this.cmd("CreateLabel", minNode.degreeID, minNode.degree, minNode.x  + QuakeHeap.DEGREE_OFFSET_X, minNode.y + QuakeHeap.DEGREE_OFFSET_Y);
+	this.cmd("SetTextColor", minNode.degreeID, "#0000FF");
+	this.cmd("SetLayer", minNode.degreeID, 2);
+	this.cmd("Step");
+
+	// link the trees as children of the new node
+	root1.parent = minNode;
+	root2.parent = minNode;
+	minNode.leftChild = this.treeRoot;
+
+	// add new tree to roots list
+	this.treeRoot = minNode;
+	this.treeRoot.rightSib = this.treeRoot.leftChild.rightSib.rightSib;
+	this.treeRoot.leftChild.rightSib.rightSib = null;
+
+	var newH = parseInt(minH) + 1;
+	if (newH in heightMap) {
+		heightMap[newH].push(minNode);
+	} else {
+		heightMap[newH] = [minNode];
+	}
+
+	console.log("Finished product");
+	this.printRootlist();
+
+	return true; // we linked 2 trees!
+}
+
+QuakeHeap.prototype.LinkAllTrees = function()
+{
+	if (this.treeRoot == null) return;
+
+	var heightMap = {};
+	var tmpRoot = this.treeRoot;
+	while (tmpRoot != null) {
+		var h = this.height(tmpRoot);
+		if (h in heightMap) {
+			heightMap[h].push(tmpRoot);
+		} else {
+			heightMap[h] = [tmpRoot];
+		}
+		tmpRoot = tmpRoot.rightSib;
+	}
+
+	console.log('heights map');
+	for (var k in heightMap) {
+		console.log(k, heightMap[k].length);
+	}
+
+	// while there are trees remaining to link, link 2 trees & animate that
+	while (true) {
+		var didLink = this.linkTwoTrees(heightMap);
+		if (!didLink) break;
+	}
 }
 		
 		
