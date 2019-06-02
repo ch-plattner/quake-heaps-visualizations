@@ -659,209 +659,49 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 	return this.commands;
 }
 
-		
-
-
-
-QuakeHeap.prototype.fixAfterRemoveMin = function()
-{
-	if (this.treeRoot == null)
-		return;
-	var degreeArray = new Array(QuakeHeap.MAX_DEGREE);
-	var degreeGraphic = new Array(QuakeHeap.MAX_DEGREE);
-	var indexID = new Array(QuakeHeap.MAX_DEGREE);
-	var tmpPtrID = this.nextIndex++;
-
-	var i;
-	for (i = 0 ; i <= QuakeHeap.MAX_DEGREE; i++)
-	{
-		degreeArray[i] = null;
-		degreeGraphic[i] = this.nextIndex++;
-		indexID[i] = this.nextIndex++;
-		this.cmd("CreateRectangle", 
-				 degreeGraphic[i], 
-				 " ", 
-				 QuakeHeap.DEGREE_ARRAY_ELEM_WIDTH, 
-				 QuakeHeap.DEGREE_ARRAY_ELEM_HEIGHT, 
-				 QuakeHeap.DEGREE_ARRAY_START_X + i * QuakeHeap.DEGREE_ARRAY_ELEM_WIDTH, 
-				 QuakeHeap.INDEGREE_ARRAY_START_Y);
-		this.cmd("SetNull", degreeGraphic[i], 1);
-		this.cmd("CreateLabel", indexID[i], i,  QuakeHeap.DEGREE_ARRAY_START_X + i * QuakeHeap.DEGREE_ARRAY_ELEM_WIDTH, 
-				 QuakeHeap.INDEGREE_ARRAY_START_Y - QuakeHeap.DEGREE_ARRAY_ELEM_HEIGHT);
-		this.cmd("SetTextColod", indexID[i], QuakeHeap.INDEX_COLOR);
-	}
-	var tmp = this.treeRoot;
-	// When remving w/ 1 tree. this.treeRoot == null?
-	this.cmd("CreateLabel", tmpPtrID, "NextElem", this.treeRoot.x, QuakeHeap.TMP_PTR_Y);
-	while (this.treeRoot != null)
-	{
-		tmp = this.treeRoot;
-		this.cmd("Connect", tmpPtrID, 
-				 tmp.graphicID,
-				 QuakeHeap.FOREGROUND_COLOR,
-				 0, // Curve
-				 1, // Directed
-				 ""); // Label
-		
-		this.treeRoot = this.treeRoot.rightSib;
-
-		this.cmd("Step");
-		tmp.rightSib = null;
-		while(degreeArray[tmp.degree] != null)
-		{
-			this.cmd("SetEdgeHighlight", tmpPtrID, tmp.graphicID, 1);
-
-			this.cmd("SetEdgeHighlight", degreeGraphic[tmp.degree], degreeArray[tmp.degree].graphicID, 1);
-			this.cmd("Step");
-			this.cmd("Disconnect", tmpPtrID, tmp.graphicID);
-
-			this.cmd("Disconnect", degreeGraphic[tmp.degree], degreeArray[tmp.degree].graphicID);
-			this.cmd("SetNull", degreeGraphic[tmp.degree], 1);
-			var tmp2 =  degreeArray[tmp.degree];
-			degreeArray[tmp.degree] = null
-			tmp = this.combineTrees(tmp, tmp2);
-			this.cmd("Connect", tmpPtrID, 
-					 tmp.graphicID,
-					 QuakeHeap.FOREGROUND_COLOR,
-					 0, // Curve
-					 1, // Directed
-					 ""); // Label
-			this.SetAllTreePositions(this.treeRoot, degreeArray, tmp);
-			this.cmd("Move", tmpPtrID, tmp.x, QuakeHeap.TMP_PTR_Y);
-			this.MoveAllTrees(this.treeRoot, degreeArray, tmp);
-		}
-		this.cmd("Disconnect",  tmpPtrID, tmp.graphicID);
-
-		degreeArray[tmp.degree] = tmp;
-		this.cmd("SetNull", degreeGraphic[tmp.degree], 0);
-		this.cmd("Connect", degreeGraphic[tmp.degree], 
-				 tmp.graphicID,
-				 QuakeHeap.FOREGROUND_COLOR,
-				 0, // Curve
-				 1, // Directed
-				 ""); // Label
-		this.cmd("Step");
-		this.SetAllTreePositions(this.treeRoot, degreeArray);
-		this.MoveAllTrees(this.treeRoot, degreeArray);
-	}
-	this.minElement = null;
-	for (i = QuakeHeap.MAX_DEGREE; i >= 0; i--)
-	{
-		if (degreeArray[i] != null)
-		{
-			degreeArray[i].rightSib = this.treeRoot;
-			if (this.minElement == null || this.minElement.data > degreeArray[i].data)
-			{
-				this.minElement = degreeArray[i];				
-			}
-			this.treeRoot = degreeArray[i];		
-		}
-				
-		this.cmd("Delete", degreeGraphic[i]);
-		this.cmd("Delete", indexID[i]);
-		
-	}
-	if (this.minElement != null)
-	{
-		this.cmd("CreateLabel", this.minID,"Min element",  this.minElement.x,QuakeHeap.TMP_PTR_Y);
-		this.cmd("Connect", this.minID, 
-				 this.minElement.graphicID,
-				 QuakeHeap.FOREGROUND_COLOR,
-				 0, // Curve
-				 1, // Directed
-				 ""); // Label
-	}
-	this.cmd("Delete", tmpPtrID);
-
-}
-
 QuakeHeap.prototype.MoveAllTrees = function(tree, treeList, tree2)
 {
-	if (tree2 != null && tree2 != undefined)
-	{
+	if (tree2 != null && tree2 != undefined) {
 		this.moveTree(tree2);
 	}
-	if (tree != null)
-	{
+	if (tree != null) {
 		this.moveTree(tree);		
 	}
-	for (var i = 0; i < treeList.length; i++)
-	{
-		if (treeList[i] != null)
-		{
+	for (var i = 0; i < treeList.length; i++) {
+		if (treeList[i] != null) {
 			this.moveTree(treeList[i]);
 		}
 	}
-	this.cmd("Step");	
-	
-	
+	this.cmd("Step");
 }
-
 
 QuakeHeap.prototype.SetAllTreePositions = function(tree, treeList, tree2)
 {
 	var leftSize = QuakeHeap.STARTING_X;
-	if (tree2 != null && tree2 != undefined)
-	{
+	if (tree2 != null && tree2 != undefined) {
 		leftSize = this.setPositions(tree2, leftSize, QuakeHeap.STARTING_Y); //  +QuakeHeap.NODE_WIDTH;
 	}
-	if (tree != null)
-	{
+	if (tree != null) {
 		leftSize = this.setPositions(tree, leftSize, QuakeHeap.STARTING_Y); // + QuakeHeap.NODE_WIDTH;
 
 	}
-	for (var i = 0; i < treeList.length; i++)
-	{
-			if (treeList[i] != null)
-			{
+	for (var i = 0; i < treeList.length; i++) {
+			if (treeList[i] != null) {
 				leftSize = this.setPositions(treeList[i], leftSize, QuakeHeap.STARTING_Y); // + QuakeHeap.NODE_WIDTH;
 			}
 	}
 }
 
-QuakeHeap.prototype.combineTrees = function(tree1, tree2)
-{
-	if (tree2.data < tree1.data)
-	{
-		var tmp = tree2;
-		tree2 = tree1;
-		tree1 = tmp;
-	}
-	if (tree1.degree != tree2.degree)
-	{
-		return null;
-	}
-	tree2.rightSib = tree1.leftChild;
-	tree2.parent =tree1;
-	tree1.leftChild = tree2;
-	tree1.degree++;
-	
-	this.cmd("SetText", tree1.degreeID, tree1.degree);
-	this.cmd("Connect", tree1.graphicID, 
-			 tree2.graphicID,
-			 QuakeHeap.FOREGROUND_COLOR,
-			 0, // Curve
-			 0, // Directed
-			 ""); // Label
-	// TODO:  Add all the internal links &etc
-
-	return tree1;
-	
-}
-
 QuakeHeap.prototype.enableUI = function(event)
 {
-	for (var i = 0; i < this.controls.length; i++)
-	{
+	for (var i = 0; i < this.controls.length; i++) {
 		this.controls[i].disabled = false;
 	}
-	
-	
 }
+
 QuakeHeap.prototype.disableUI = function(event)
 {
-	for (var i = 0; i < this.controls.length; i++)
-	{
+	for (var i = 0; i < this.controls.length; i++) {
 		this.controls[i].disabled = true;
 	}
 }
