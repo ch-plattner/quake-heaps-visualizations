@@ -89,9 +89,11 @@ QuakeHeap.prototype.addControls =  function()
 	this.controls.push(this.insertButton);
 
 	// Decrease key text inputs and button
-	this.decreaseKeyOldValueField = addControlToAlgorithmBar("Text", "Key to decrease");
+	this.decreaseKeyOldValueField = addControlToAlgorithmBar("Text", "");
+	this.decreaseKeyOldValueField.placeholder = "Key to decrease";
 	this.controls.push(this.decreaseKeyOldValueField);
-	this.decreaseKeyNewValueField = addControlToAlgorithmBar("Text", "New key value");
+	this.decreaseKeyNewValueField = addControlToAlgorithmBar("Text", "");
+	this.decreaseKeyNewValueField.placeholder = "New key value";	
 	this.controls.push(this.decreaseKeyNewValueField);
 	this.decreaseKeyButton = addControlToAlgorithmBar("Button", "Decrease Key");
 	this.decreaseKeyButton.onclick = this.decreaseKeyCallback.bind(this);
