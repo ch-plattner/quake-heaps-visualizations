@@ -1,4 +1,20 @@
-﻿// Copyright 2011 David Galles, University of San Francisco. All rights reserved.
+﻿/**
+ * File: QuakeHeap.js
+ * Authors: Charissa Plattner (chariss@cs.stanford.edu)
+ *			Laura Cruz-Albrecht (TODO)
+ *			Gabriel Garza (TODO)
+ * =====================================================
+ * This file implements the general functionality for visualizing
+ * a QuakeHeap in action. It supports the following functionality:
+ * - insert
+ * - decreaseKey
+ * - extractMin
+ *
+ * Note that this is a visualization library only, and its current implementation
+ * does not match the amortized bounds of Quake Heaps as proposed in the initial paper by Chan.
+ */
+
+// Copyright 2011 David Galles, University of San Francisco. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
