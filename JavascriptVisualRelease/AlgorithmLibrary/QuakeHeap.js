@@ -203,7 +203,7 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 		this.treeRoot = insertNode;
 		this.SetAllPositionsByHeight();
 		this.moveTree(this.treeRoot);
-		this.cmd("CreateLabel", this.minID, "Min element", this.treeRoot.x, QuakeHeap.TMP_PTR_Y);
+		this.cmd("CreateLabel", this.minID, "Min element", this.treeRoot.x, this.treeRoot.y - QuakeHeap.NODE_HEIGHT);
 		this.minElement = this.treeRoot;
 		this.cmd("Connect", this.minID, 
 				 this.minElement.graphicID,
@@ -283,7 +283,7 @@ QuakeHeap.prototype.decreaseKey = function(keys)
 	this.SetAllPositionsByHeight();
 	this.moveTree(this.treeRoot);
 
-	this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
+	this.cmd("Move", this.minID, this.minElement.x, this.minElement.y  - QuakeHeap.NODE_HEIGHT);
 
 	return this.commands;
 }
@@ -644,7 +644,7 @@ QuakeHeap.prototype.FindNewMin = function()
 	}
 
 	if (this.minElement != null) {
-		this.cmd("CreateLabel", this.minID, "Min element", this.minElement.x, QuakeHeap.TMP_PTR_Y);
+		this.cmd("CreateLabel", this.minID, "Min element", this.minElement.x, this.minElement.y - QuakeHeap.NODE_HEIGHT);
 		this.cmd("Connect", this.minID, 
 			this.minElement.graphicID,
 			QuakeHeap.FOREGROUND_COLOR,
@@ -666,7 +666,7 @@ QuakeHeap.prototype.maybeUpdateMinLabel = function(node)
 				 1, // Directed
 				 ""); // Label
 	}
-	this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
+	this.cmd("Move", this.minID, this.minElement.x, this.minElement.y - QuakeHeap.NODE_HEIGHT);
 }
 
 /********************************************************************
