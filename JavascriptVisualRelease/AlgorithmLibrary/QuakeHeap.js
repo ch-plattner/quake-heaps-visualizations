@@ -235,58 +235,40 @@ QuakeHeap.prototype.decreaseKey = function(keys)
 	var oldKey = keys[0];
 	var newKey = keys[1];
 
-	var root;
-	var isFound = false;
-	for (root = this.treeRoot; root != null && !isFound; root = root.rightSib) {
-		var curr = root;
-		while (curr != null) {
-			if (curr.data == oldKey) {
-				isFound = true;
-
-				// Disconnect curr from parent
-				var parent = curr.parent;
-				if (parent != null) {
-					if (parent.leftChild == curr) {
-						parent.leftChild = curr.rightSib;
-					} else {
-						parent.leftChild.rightSib = null;
-					}
-					this.cmd("Disconnect", parent.graphicID, curr.graphicID);
-				}
-
-				// Traverse tree to update label for entire path
-				var node = curr;
-				while (node != null) {
-					node.data = newKey;
-					this.cmd("SetText", node.graphicID, newKey);
-					node = node.leftChild;
-				}
-
-				// Add node to treeRoot list if it wasn't already there 
-				if (curr != root) {
-					curr.parent = null;
-					curr.rightSib = this.treeRoot;
-					this.treeRoot = curr;
-				}
-
-				this.maybeUpdateMinLabel(curr);
-
-				break;
+	for (var root = this.treeRoot; root != null; root = root.rightSib) {
+		var node = this.findKey(root, oldKey);
+		if (node == null) continue;
+		
+		// Disconnect node from parent
+		var parent = node.parent;
+		if (parent != null) {
+			if (parent.leftChild == node) {
+				parent.leftChild = node.rightSib;
 			} else {
-				// check children
-				if (curr.leftChild == null) break;
-				if (oldKey < curr.data) {
-					curr = curr.leftChild;
-				} else {
-					// BUG IS HERE
-					curr = curr.leftChild.rightSib;
-				}
+				parent.leftChild.rightSib = null;
 			}
+			this.cmd("Disconnect", parent.graphicID, node.graphicID);
 		}
+
+		// Traverse tree to update label for entire path
+		var curr = node;
+		while (curr != null) {
+			curr.data = newKey;
+			this.cmd("SetText", curr.graphicID, newKey);
+			curr = curr.leftChild;
+		}
+
+		// Add node to treeRoot list if it wasn't already there 
+		if (node != root) {
+			node.parent = null;
+			node.rightSib = this.treeRoot;
+			this.treeRoot = node;
+		}
+
+		this.maybeUpdateMinLabel(node);
 	}
 
 	this.SetAllPositionsByHeight();
-	// this.setPositionsByHeight(this.treeRoot, this.height(this.treeRoot), QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
 	this.moveTree(this.treeRoot);
 
 	this.cmd("Move", this.minID, this.minElement.x, QuakeHeap.TMP_PTR_Y);
@@ -391,6 +373,20 @@ QuakeHeap.prototype.reset = function()
 /********************************************************************
  * MAIN TREE HELPER FUNCTIONS	    							    *
  ********************************************************************/
+
+QuakeHeap.prototype.findKey = function(root, key)
+{
+	if (root == null) return null;
+	if (root.data == key) return root;
+
+	var leftChildOption = this.findKey(root.leftChild, key);
+	if (leftChildOption != null) return leftChildOption;
+
+	if (root.leftChild != null) {
+		return this.findKey(root.leftChild.rightSib, key);
+	}
+	return null;
+}
 
 QuakeHeap.prototype.GetNodesPerLevel = function(tree, height, nodesPerLevel)
 {
