@@ -437,18 +437,16 @@ QuakeHeap.prototype.Quake = function()
 
 	// Remove all animations above quake_level
 	this.cmd("Step");
-	for (var level = quake_level + 1; level < levels.length; level++) {
-		nodes = nodesPerLevel[level];
-		for (i = 0; i < nodes.length; i++) {
-			var node = nodes[i];
-			if (node.leftChild != null) {
-				this.cmd("Disconnect", node.graphicID, node.leftChild.graphicID);
-				this.cmd("Step");
+	nodes = nodesPerLevel[quake_level + 1];
+	for (i = 0; i < nodes.length; i++) {
+		var node = nodes[i];
+		if (node.leftChild != null) {
+			this.cmd("Disconnect", node.graphicID, node.leftChild.graphicID);
+			this.cmd("Step");
 
-				if (node.leftChild.rightSib != null) {
-					this.cmd("Disconnect", node.graphicID, node.leftChild.rightSib.graphicID);
-					this.cmd("Step");
-				}
+			if (node.leftChild.rightSib != null) {
+				this.cmd("Disconnect", node.graphicID, node.leftChild.rightSib.graphicID);
+				this.cmd("Step");
 			}
 		}
 	}
