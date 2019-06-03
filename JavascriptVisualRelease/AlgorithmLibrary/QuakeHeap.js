@@ -75,6 +75,7 @@ QuakeHeap.prototype.init = function(am, w, h)
 	this.animationManager.setAllLayers([0,this.currentLayer]);
 	this.minID = 0;
 	this.nextIndex = 1;
+	this.alpha = 0.55;
 }
 
 
@@ -228,6 +229,7 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 
 QuakeHeap.prototype.decreaseKey = function(keys)
 {
+	// TODO: fix bug that key is not found when it is a right child.....
 	this.commands = new Array();
 
 	var oldKey = keys[0];
@@ -276,14 +278,12 @@ QuakeHeap.prototype.decreaseKey = function(keys)
 				if (oldKey < curr.data) {
 					curr = curr.leftChild;
 				} else {
+					// BUG IS HERE
 					curr = curr.leftChild.rightSib;
 				}
 			}
 		}
 	}
-
-	// this.SetAllTreePositions(this.treeRoot, []);
-	// this.MoveAllTrees(this.treeRoot, []);
 
 	this.SetAllPositionsByHeight();
 	// this.setPositionsByHeight(this.treeRoot, this.height(this.treeRoot), QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
@@ -353,17 +353,12 @@ QuakeHeap.prototype.removeSmallest = function(dummy)
 		}
 
 		// Link trees
-		// this.SetAllTreePositions(this.treeRoot, []);
-		// this.MoveAllTrees(this.treeRoot, []);
 		this.SetAllPositionsByHeight();
 		this.moveTree(this.treeRoot);
 		this.LinkAllTrees();
 
 		this.SetAllPositionsByHeight();
 		this.moveTree(this.treeRoot);
-
-		// this.SetAllTreePositions(this.treeRoot, []);
-		// this.MoveAllTrees(this.treeRoot, []);
 
 		// Find new minElement
 		this.minElement = null;
@@ -385,6 +380,8 @@ QuakeHeap.prototype.removeSmallest = function(dummy)
 
 		// Remove the label
 		this.cmd("Delete", moveLabel);
+
+		this.Quake();
 	}
 	return this.commands;
 }
@@ -409,6 +406,45 @@ QuakeHeap.prototype.reset = function()
 /********************************************************************
  * MAIN TREE HELPER FUNCTIONS	    							    *
  ********************************************************************/
+
+QuakeHeap.prototype.GetNodesPerLevel = function(tree, height, nodesPerLevel)
+{
+	if (tree == null) return;
+
+	if (height in nodesPerLevel) {
+		nodesPerLevel[height] += 1;
+	} else {
+		nodesPerLevel[height] = 1;
+	}
+
+	this.GetNodesPerLevel(tree.leftChild, height - 1, nodesPerLevel);
+	this.GetNodesPerLevel(tree.rightSib, this.height(tree.rightSib) - 1, nodesPerLevel);
+}
+
+QuakeHeap.prototype.Quake = function()
+{
+	var nodesPerLevel = {};
+	this.GetNodesPerLevel(this.treeRoot, this.height(this.treeRoot) - 1, nodesPerLevel);
+	
+	var levels = Object.keys(nodesPerLevel).sort();
+	var quake_level = -1;
+	for (var i = 0; i < levels.length; i++) {
+		var level_i = levels[i];
+		var level_iplus1 = levels[i + 1];
+		if (nodesPerLevel[level_iplus1] > this.alpha * nodesPerLevel[level_i]) {
+			nodesPerLevel = level_i;
+			break;
+		}
+	}
+
+	if (quake_level == -1) {
+		alert('no quake!');
+		return; // no need to quake!
+	}
+
+
+	alert('quake: ' + quake_level);
+}
 
 QuakeHeap.prototype.LinkAllTrees = function()
 {
@@ -500,8 +536,6 @@ QuakeHeap.prototype.linkTwoTrees = function(heightMap)
 	this.treeRoot = minNode;
 	this.treeRoot.rightSib = this.treeRoot.leftChild.rightSib.rightSib;
 	this.treeRoot.leftChild.rightSib.rightSib = null;
-
-	this.printRootlist();
 
 	this.SetAllPositionsByHeight();
 	this.moveTree(this.treeRoot);
@@ -597,10 +631,7 @@ QuakeHeap.prototype.SetAllPositionsByHeight = function()
 
 		var yPosition = QuakeHeap.LEAF_STARTING_Y - (height - 1) * QuakeHeap.NODE_HEIGHT;
 
-		root.x = xPosition + (treeWidth / 2);
-		root.y = yPosition;
-
-		this.SetTreePositionsRecursive(root.leftChild, height - 1, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
+		this.SetTreePositionsRecursive(root, height, xPosition, yPosition);
 
 		xPosition += treeWidth; // enable the next root to start at the right place!
 	}
@@ -608,6 +639,8 @@ QuakeHeap.prototype.SetAllPositionsByHeight = function()
 
 QuakeHeap.prototype.SetTreePositionsRecursive = function(tree, height, xPosition, yPosition)
 {
+	// TODO: make chains stack on top of each other
+
 	if (tree == null || height == 0) return;
 
 	var treeWidth = Math.pow(2, height - 1) * QuakeHeap.NODE_WIDTH;
@@ -620,7 +653,9 @@ QuakeHeap.prototype.SetTreePositionsRecursive = function(tree, height, xPosition
 		tree.y = yPosition;
 
 		this.SetTreePositionsRecursive(tree.leftChild, height - 1, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
-		this.SetTreePositionsRecursive(tree.rightSib, height, xPosition + treeWidth, yPosition);	
+		if (tree.leftChild != null) {
+			this.SetTreePositionsRecursive(tree.leftChild.rightSib, height - 1, xPosition + treeWidth / 2, yPosition + QuakeHeap.NODE_HEIGHT);
+		}
 	}
 }
 
