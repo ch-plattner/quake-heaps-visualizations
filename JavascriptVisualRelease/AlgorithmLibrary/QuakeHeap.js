@@ -186,7 +186,6 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 	if (this.treeRoot == null) {
 		this.treeRoot = insertNode;
 		this.SetAllPositionsByHeight();
-		// this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
 		this.moveTree(this.treeRoot);
 		this.cmd("CreateLabel", this.minID, "Min element", this.treeRoot.x, QuakeHeap.TMP_PTR_Y);
 		this.minElement = this.treeRoot;
@@ -206,7 +205,6 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 			
 			this.cmd("Step");
 			this.SetAllPositionsByHeight();
-			// this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
 			this.maybeUpdateMinLabel(insertNode);
 			this.moveTree(this.treeRoot);
 			
@@ -218,7 +216,6 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 			
 			this.cmd("Step");
 			this.SetAllPositionsByHeight();
-			// this.setPositions(this.treeRoot, QuakeHeap.STARTING_X, QuakeHeap.STARTING_Y);
 			this.maybeUpdateMinLabel(insertNode);
 			this.moveTree(this.treeRoot);
 		}
@@ -229,7 +226,6 @@ QuakeHeap.prototype.insertElement = function(insertedValue)
 
 QuakeHeap.prototype.decreaseKey = function(keys)
 {
-	// TODO: fix bug that key is not found when it is a right child.....
 	this.commands = new Array();
 
 	var oldKey = keys[0];
@@ -431,6 +427,8 @@ QuakeHeap.prototype.Quake = function()
 	}
 	this.treeRoot = newTreeList;
 
+	// TODO: add animation alert that a quake is about to happen!
+
 	// Remove all animations above quake_level
 	this.cmd("Step");
 	nodes = nodesPerLevel[quake_level + 1];
@@ -465,8 +463,6 @@ QuakeHeap.prototype.Quake = function()
 	// Reset min element
 	this.cmd("Delete", this.minID);
 	this.FindNewMin();
-
-	alert('QUAKE!!');
 }
 
 QuakeHeap.prototype.LinkAllTrees = function()
@@ -517,10 +513,6 @@ QuakeHeap.prototype.linkTwoTrees = function(heightMap)
 	// remove them both from treelist
 	this.removeFromRootList(root1);
 	this.removeFromRootList(root2);
-
-	// this.SetAllPositionsByHeight();
-	// this.moveTree(this.treeRoot);
-	// this.cmd("Step");
 
 	// move them to the front
 	if (root1.data < root2.data) {
@@ -701,66 +693,6 @@ QuakeHeap.prototype.SetTreePositionsRecursive = function(tree, height, xPosition
 		}
 	}
 }
-
-QuakeHeap.prototype.setPositionsByHeight = function(tree, height, xPosition, yPosition) 
-{
-	alert('no bitch');
-	// if (tree != null)
-	// {
-	// 	if (height == 0)
-	// 	{
-	// 		tree.x = xPosition;
-	// 		tree.y = yPosition;
-	// 		return this.setPositionsByHeight(tree.rightSib, height, xPosition + QuakeHeap.NODE_WIDTH, yPosition);
-	// 	}
-	// 	else if (height == 1)
-	// 	{
-	// 		tree.x = xPosition;
-	// 		tree.y = yPosition;
-	// 		this.setPositions(tree.leftChild, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
-	// 		return this.setPositionsByHeight(tree.rightSib, height, xPosition + QuakeHeap.NODE_WIDTH, yPosition);					
-	// 	}
-	// 	else
-	// 	{
-	// 		var treeWidth = Math.pow(2, height - 1);
-	// 		tree.x = xPosition + (treeWidth - 1) * QuakeHeap.NODE_WIDTH;
-	// 		tree.y = yPosition;
-	// 		this.setPositionsByHeight(tree.leftChild, height - 1, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
-	// 		return this.setPositionsByHeight(tree.rightSib, height, xPosition + treeWidth * QuakeHeap.NODE_WIDTH, yPosition);
-	// 	}
-	// }
-	// return xPosition;
-}	
-	
-QuakeHeap.prototype.setPositions = function(tree, xPosition, yPosition) 
-{
-	alert('no bitch');
-	if (tree != null)
-	{
-		if (tree.degree == 0)
-		{
-			tree.x = xPosition;
-			tree.y = yPosition;
-			return this.setPositions(tree.rightSib, xPosition + QuakeHeap.NODE_WIDTH, yPosition);
-		}
-		else if (tree.degree == 1)
-		{
-			tree.x = xPosition;
-			tree.y = yPosition;
-			this.setPositions(tree.leftChild, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
-			return this.setPositions(tree.rightSib, xPosition + QuakeHeap.NODE_WIDTH, yPosition);					
-		}
-		else
-		{
-			var treeWidth = Math.pow(2, tree.degree - 1);
-			tree.x = xPosition + (treeWidth - 1) * QuakeHeap.NODE_WIDTH;
-			tree.y = yPosition;
-			this.setPositions(tree.leftChild, xPosition, yPosition + QuakeHeap.NODE_HEIGHT);
-			return this.setPositions(tree.rightSib, xPosition + treeWidth * QuakeHeap.NODE_WIDTH, yPosition);
-		}
-	}
-	return xPosition;
-}
 		
 QuakeHeap.prototype.moveTree = function(tree)
 {
@@ -782,41 +714,6 @@ QuakeHeap.prototype.deleteTree = function(tree)
 		this.cmd("Delete", tree.degreeID);
 		this.deleteTree(tree.leftChild);
 		this.deleteTree(tree.rightSib);
-	}
-}
-
-QuakeHeap.prototype.MoveAllTrees = function(tree, treeList, tree2)
-{
-	alert('no bitch');
-	if (tree2 != null && tree2 != undefined) {
-		this.moveTree(tree2);
-	}
-	if (tree != null) {
-		this.moveTree(tree);		
-	}
-	for (var i = 0; i < treeList.length; i++) {
-		if (treeList[i] != null) {
-			this.moveTree(treeList[i]);
-		}
-	}
-	this.cmd("Step");
-}
-
-QuakeHeap.prototype.SetAllTreePositions = function(tree, treeList, tree2)
-{
-	alert('no bitch');
-	var leftSize = QuakeHeap.STARTING_X;
-	if (tree2 != null && tree2 != undefined) {
-		leftSize = this.setPositions(tree2, leftSize, QuakeHeap.STARTING_Y); //  +QuakeHeap.NODE_WIDTH;
-	}
-	if (tree != null) {
-		leftSize = this.setPositions(tree, leftSize, QuakeHeap.STARTING_Y); // + QuakeHeap.NODE_WIDTH;
-
-	}
-	for (var i = 0; i < treeList.length; i++) {
-			if (treeList[i] != null) {
-				leftSize = this.setPositions(treeList[i], leftSize, QuakeHeap.STARTING_Y); // + QuakeHeap.NODE_WIDTH;
-			}
 	}
 }
 
