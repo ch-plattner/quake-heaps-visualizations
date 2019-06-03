@@ -432,16 +432,14 @@ QuakeHeap.prototype.Quake = function()
 		var level_i = levels[i];
 		var level_iplus1 = levels[i + 1];
 		if (nodesPerLevel[level_iplus1] > this.alpha * nodesPerLevel[level_i]) {
-			nodesPerLevel = level_i;
+			quake_level = level_i;
 			break;
 		}
 	}
 
 	if (quake_level == -1) {
-		alert('no quake!');
 		return; // no need to quake!
 	}
-
 
 	alert('quake: ' + quake_level);
 }
