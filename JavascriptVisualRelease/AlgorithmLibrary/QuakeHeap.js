@@ -419,6 +419,12 @@ QuakeHeap.prototype.Quake = function()
 		return; // no need to quake!
 	}
 
+	for (var i = 0; i < 10; i++) {
+		this.OffsetTreePositionsRecursive(this.treeRoot);
+		this.moveTree(this.treeRoot);
+		this.cmd("Step");
+	}
+
 	// Reset root list to be the nodes at quake_level
 	var newTreeList = null;
 	var nodes = nodesPerLevel[quake_level];
@@ -680,6 +686,28 @@ QuakeHeap.prototype.SetAllPositionsByHeight = function()
 
 		xPosition += treeWidth; // enable the next root to start at the right place!
 	}
+}
+
+QuakeHeap.prototype.OffsetTreePositionsRecursive = function(tree)
+{
+	if (tree == null) return;
+
+	var xOffset = Math.random() * 5;
+	var yOffset =  Math.random() * 5;
+
+	if (Math.random() < 0.5) {
+		xOffset *= -1;
+	}
+
+	if (Math.random() < 0.5) {
+		yOffset *= -1;
+	}
+
+	tree.x += xOffset;
+	tree.y += yOffset;
+
+	this.OffsetTreePositionsRecursive(tree.leftChild);
+	this.OffsetTreePositionsRecursive(tree.rightSib);
 }
 
 QuakeHeap.prototype.SetTreePositionsRecursive = function(tree, height, xPosition, yPosition)
