@@ -426,6 +426,13 @@ QuakeHeap.prototype.Quake = function()
 		node.rightSib = newTreeList;
 		newTreeList = node;
 	}
+	for (var root = this.treeRoot; root != null; root = root.rightSib) {
+		if (this.height(root) <= quake_level) {
+			root.parent = null;
+			root.rightSib = newTreeList;
+			newTreeList = root;
+		}
+	}
 	this.treeRoot = newTreeList;
 
 	// TODO: add animation alert that a quake is about to happen!
