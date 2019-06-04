@@ -128,6 +128,8 @@ QuakeHeap.prototype.addControls =  function()
 	this.clearHeapButton = addControlToAlgorithmBar("Button", "Clear Heap");
 	this.clearHeapButton.onclick = this.clearCallback.bind(this);
 	this.controls.push(this.clearHeapButton);
+
+	// TODO: add alpha slider
 }
 
 /********************************************************************
@@ -319,31 +321,16 @@ QuakeHeap.prototype.removeSmallest = function(dummy)
 		
 		// Remove all nodes in the tree rooted at minElement which contain the minElement
 		var leftChild = this.minElement.leftChild;
-		var rightChild;
 		while (leftChild != null) {
-			rightChild = leftChild.rightSib;
-			if (leftChild.data == this.minElement.data) {
-				if (rightChild != null) {
-					tmp = rightChild;
-					tmp.parent = null;
-					tmp.rightSib = this.treeRoot;
-					this.treeRoot = tmp;
-				}
-				this.cmd("Delete", leftChild.graphicID);
-				this.cmd("Delete", leftChild.degreeID);
-				leftChild = leftChild.leftChild;
-			} else {
-				// If we get here, we are guaranteed to have a rightchild
-				this.cmd("Delete", rightChild.graphicID);
-				this.cmd("Delete", rightChild.degreeID);
-
-				tmp = leftChild;
-				tmp.parent = null;
-				tmp.rightSib = this.treeRoot;
-				this.treeRoot = tmp;
-
-				leftChild = rightChild.leftChild;
+			var rightChild = leftChild.rightSib;
+			if (rightChild != null) {
+				rightChild.parent = null;
+				rightChild.rightSib = this.treeRoot;
+				this.treeRoot = rightChild;
 			}
+			this.cmd("Delete", leftChild.graphicID);
+			this.cmd("Delete", leftChild.degreeID);
+			leftChild = leftChild.leftChild;
 		}
 
 		// Link trees
@@ -432,6 +419,12 @@ QuakeHeap.prototype.Quake = function()
 		return; // no need to quake!
 	}
 
+	for (var i = 0; i < 10; i++) {
+		this.OffsetTreePositionsRecursive(this.treeRoot);
+		this.moveTree(this.treeRoot);
+		this.cmd("Step");
+	}
+
 	// Reset root list to be the nodes at quake_level
 	var newTreeList = null;
 	var nodes = nodesPerLevel[quake_level];
@@ -440,6 +433,13 @@ QuakeHeap.prototype.Quake = function()
 		node.parent = null;
 		node.rightSib = newTreeList;
 		newTreeList = node;
+	}
+	for (var root = this.treeRoot; root != null; root = root.rightSib) {
+		if (this.height(root) <= quake_level) {
+			root.parent = null;
+			root.rightSib = newTreeList;
+			newTreeList = root;
+		}
 	}
 	this.treeRoot = newTreeList;
 
@@ -686,6 +686,28 @@ QuakeHeap.prototype.SetAllPositionsByHeight = function()
 
 		xPosition += treeWidth; // enable the next root to start at the right place!
 	}
+}
+
+QuakeHeap.prototype.OffsetTreePositionsRecursive = function(tree)
+{
+	if (tree == null) return;
+
+	var xOffset = Math.random() * 5;
+	var yOffset =  Math.random() * 5;
+
+	if (Math.random() < 0.5) {
+		xOffset *= -1;
+	}
+
+	if (Math.random() < 0.5) {
+		yOffset *= -1;
+	}
+
+	tree.x += xOffset;
+	tree.y += yOffset;
+
+	this.OffsetTreePositionsRecursive(tree.leftChild);
+	this.OffsetTreePositionsRecursive(tree.rightSib);
 }
 
 QuakeHeap.prototype.SetTreePositionsRecursive = function(tree, height, xPosition, yPosition)
