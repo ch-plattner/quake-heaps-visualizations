@@ -53,8 +53,12 @@ body {
 	height: inherit;
 }
 
-#zzzzzzz button {
- 
+input[type="button"] {
+ 	cursor: pointer;
+}
+
+a.ui-slider-handle.ui-state-default.ui-corner-all {
+	cursor: pointer;
 }
 
 td < input.myClassB {
