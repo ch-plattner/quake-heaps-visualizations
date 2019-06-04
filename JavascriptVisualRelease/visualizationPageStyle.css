@@ -44,6 +44,45 @@ body {
 
 }
 
+#mainContent {
+	height: 500px;
+}
+
+#zzzzzzz {
+	display: inline-flex;
+	height: inherit;
+}
+
+#zzzzzzz button {
+ 
+}
+
+td < input.myClassB {
+	cursor: pointer;
+}
+
+input.myClassB {
+	cursor: pointer;
+}
+
+.blankClass {
+	background: transparent;
+	border: none;
+}
+
+#algoControlSection {
+	width: 200px;
+}
+
+#algoControlSection td {
+	float: left;
+	width: -webkit-fill-available;
+}
+
+#algoControlSection td input {
+	width: -webkit-fill-available;
+}
+
 .VisualizationMainPage  #header { 
 	background: #006633; 
 	color:#ffCC33;

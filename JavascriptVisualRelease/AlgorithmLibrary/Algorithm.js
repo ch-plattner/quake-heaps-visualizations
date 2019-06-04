@@ -99,6 +99,14 @@ function addControlToAlgorithmBar(type, name) {
 	
     element.setAttribute("type", type);
     element.setAttribute("value", name);
+
+    if (type == "Button") {
+    	element.setAttribute("class", "myclassB");    	
+    } else if (type == "Text") {
+    	element.setAttribute("class", "myClassA");
+    } else {
+    	element.setAttribute("class", "blankClass");
+    }
 //    element.setAttribute("name", name);
 	
 	

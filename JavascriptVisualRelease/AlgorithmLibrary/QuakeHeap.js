@@ -98,15 +98,26 @@ QuakeHeap.prototype.init = function(am, w, h)
 QuakeHeap.prototype.addControls =  function()
 {
 	this.controls = [];
-
+this.blankField = addControlToAlgorithmBar("None", "");
+	// this.blankField.placeholder = "Key to insert";
+	this.blankField.class = 'blankClass';
+	this.controls.push(this.blankField);
 	// Increase key text input and button
 	this.insertField = addControlToAlgorithmBar("Text", "");
+	this.insertField.placeholder = "Key to insert"
 	this.insertField.onkeydown = this.returnSubmit(this.insertField,  this.insertCallback.bind(this), 4);
 	this.controls.push(this.insertField);
+
+	
 
 	this.insertButton = addControlToAlgorithmBar("Button", "Insert");
 	this.insertButton.onclick = this.insertCallback.bind(this);
 	this.controls.push(this.insertButton);
+
+this.blankField = addControlToAlgorithmBar("None", "");
+	// this.blankField.placeholder = "Key to insert";
+	this.blankField.class = 'blankClass';
+	this.controls.push(this.blankField);	
 
 	// Decrease key text inputs and button
 	this.decreaseKeyOldValueField = addControlToAlgorithmBar("Text", "");
@@ -119,11 +130,20 @@ QuakeHeap.prototype.addControls =  function()
 	this.decreaseKeyButton.onclick = this.decreaseKeyCallback.bind(this);
 	this.controls.push(this.decreaseKeyButton);
 
+this.blankField = addControlToAlgorithmBar("None", "");
+	// this.blankField.placeholder = "Key to insert";
+	this.blankField.class = 'blankClass';
+	this.controls.push(this.blankField);
+
 	// Remove smallest key button
 	this.removeSmallestButton = addControlToAlgorithmBar("Button", "Remove Smallest");
 	this.removeSmallestButton.onclick = this.removeSmallestCallback.bind(this);
 	this.controls.push(this.removeSmallestButton);
 
+this.blankField = addControlToAlgorithmBar("None", "");
+	// this.blankField.placeholder = "Key to insert";
+	this.blankField.class = 'blankClass';
+	this.controls.push(this.blankField);
 	// Clear entire heap button
 	this.clearHeapButton = addControlToAlgorithmBar("Button", "Clear Heap");
 	this.clearHeapButton.onclick = this.clearCallback.bind(this);
