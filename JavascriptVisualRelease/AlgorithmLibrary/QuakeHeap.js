@@ -319,31 +319,16 @@ QuakeHeap.prototype.removeSmallest = function(dummy)
 		
 		// Remove all nodes in the tree rooted at minElement which contain the minElement
 		var leftChild = this.minElement.leftChild;
-		var rightChild;
 		while (leftChild != null) {
-			rightChild = leftChild.rightSib;
-			if (leftChild.data == this.minElement.data) {
-				if (rightChild != null) {
-					tmp = rightChild;
-					tmp.parent = null;
-					tmp.rightSib = this.treeRoot;
-					this.treeRoot = tmp;
-				}
-				this.cmd("Delete", leftChild.graphicID);
-				this.cmd("Delete", leftChild.degreeID);
-				leftChild = leftChild.leftChild;
-			} else {
-				// If we get here, we are guaranteed to have a rightchild
-				this.cmd("Delete", rightChild.graphicID);
-				this.cmd("Delete", rightChild.degreeID);
-
-				tmp = leftChild;
-				tmp.parent = null;
-				tmp.rightSib = this.treeRoot;
-				this.treeRoot = tmp;
-
-				leftChild = rightChild.leftChild;
+			var rightChild = leftChild.rightSib;
+			if (rightChild != null) {
+				rightChild.parent = null;
+				rightChild.rightSib = this.treeRoot;
+				this.treeRoot = rightChild;
 			}
+			this.cmd("Delete", leftChild.graphicID);
+			this.cmd("Delete", leftChild.degreeID);
+			leftChild = leftChild.leftChild;
 		}
 
 		// Link trees
