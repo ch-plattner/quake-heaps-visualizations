@@ -128,6 +128,8 @@ QuakeHeap.prototype.addControls =  function()
 	this.clearHeapButton = addControlToAlgorithmBar("Button", "Clear Heap");
 	this.clearHeapButton.onclick = this.clearCallback.bind(this);
 	this.controls.push(this.clearHeapButton);
+
+	// TODO: add alpha slider
 }
 
 /********************************************************************
