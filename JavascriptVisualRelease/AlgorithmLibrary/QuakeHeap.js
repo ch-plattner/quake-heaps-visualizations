@@ -98,7 +98,7 @@ QuakeHeap.prototype.init = function(am, w, h)
 QuakeHeap.prototype.addControls =  function()
 {
 	this.controls = [];
-this.blankField = addControlToAlgorithmBar("None", "");
+	this.blankField = addControlToAlgorithmBar("None", "");
 	// this.blankField.placeholder = "Key to insert";
 	this.blankField.class = 'blankClass';
 	this.controls.push(this.blankField);
@@ -114,7 +114,7 @@ this.blankField = addControlToAlgorithmBar("None", "");
 	this.insertButton.onclick = this.insertCallback.bind(this);
 	this.controls.push(this.insertButton);
 
-this.blankField = addControlToAlgorithmBar("None", "");
+	this.blankField = addControlToAlgorithmBar("None", "");
 	// this.blankField.placeholder = "Key to insert";
 	this.blankField.class = 'blankClass';
 	this.controls.push(this.blankField);	
@@ -130,7 +130,7 @@ this.blankField = addControlToAlgorithmBar("None", "");
 	this.decreaseKeyButton.onclick = this.decreaseKeyCallback.bind(this);
 	this.controls.push(this.decreaseKeyButton);
 
-this.blankField = addControlToAlgorithmBar("None", "");
+	this.blankField = addControlToAlgorithmBar("None", "");
 	// this.blankField.placeholder = "Key to insert";
 	this.blankField.class = 'blankClass';
 	this.controls.push(this.blankField);
@@ -140,7 +140,7 @@ this.blankField = addControlToAlgorithmBar("None", "");
 	this.removeSmallestButton.onclick = this.removeSmallestCallback.bind(this);
 	this.controls.push(this.removeSmallestButton);
 
-this.blankField = addControlToAlgorithmBar("None", "");
+	this.blankField = addControlToAlgorithmBar("None", "");
 	// this.blankField.placeholder = "Key to insert";
 	this.blankField.class = 'blankClass';
 	this.controls.push(this.blankField);
@@ -300,6 +300,7 @@ QuakeHeap.prototype.decreaseKey = function(keys)
 		}
 
 		this.maybeUpdateMinLabel(node);
+		break;
 	}
 
 	this.SetAllPositionsByHeight();
