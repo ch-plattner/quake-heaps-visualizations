@@ -72,7 +72,7 @@ QuakeHeap.TMP_PTR_Y = 60;
 QuakeHeap.LEAF_STARTING_X = 70;
 QuakeHeap.LEAF_STARTING_Y = 400; // TODO: make dynamic somehow?^
 
-QuakeHeap.ALPHA = 0.62;  // initial value; can be toggled via slider
+QuakeHeap.ALPHA = 0.55;  // initial value; can be toggled via slider
 
 function QuakeHeap(am, w, h)
 {
