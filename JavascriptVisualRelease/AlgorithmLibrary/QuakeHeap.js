@@ -72,6 +72,8 @@ QuakeHeap.TMP_PTR_Y = 60;
 QuakeHeap.LEAF_STARTING_X = 70;
 QuakeHeap.LEAF_STARTING_Y = 400; // TODO: make dynamic somehow?^
 
+QuakeHeap.ALPHA = 0.62;  // initial value; can be toggled via slider
+
 function QuakeHeap(am, w, h)
 {
 	this.init(am, w, h);
@@ -91,7 +93,6 @@ QuakeHeap.prototype.init = function(am, w, h)
 	this.animationManager.setAllLayers([0,this.currentLayer]);
 	this.minID = 0;
 	this.nextIndex = 1;
-	this.alpha = 0.55;
 }
 
 
@@ -149,7 +150,24 @@ QuakeHeap.prototype.addControls =  function()
 	this.clearHeapButton.onclick = this.clearCallback.bind(this);
 	this.controls.push(this.clearHeapButton);
 
-	// TODO: add alpha slider
+	this.blankField = addControlToAlgorithmBar("None", "");
+	this.blankField.class = 'blankClass';
+	this.controls.push(this.blankField);
+
+	// alpha labels and slider
+	addLabelToAlgorithmBar("Alpha")
+
+	this.alphaSlider = addControlToAlgorithmBar("input");	
+	this.alphaSlider.setAttribute("type", "range");
+	this.alphaSlider.setAttribute("min", 1);
+	this.alphaSlider.setAttribute("max", 100);
+	// init slider position based on alpha
+	this.initVal = 1 + ((QuakeHeap.ALPHA - 0.5) / 0.5) * 100; 
+	this.alphaSlider.setAttribute("value", this.initVal);
+	this.alphaSlider.oninput = this.setAlphaCallback.bind(this);
+	this.controls.push(this.alphaSlider);
+	// label below slider displaying alpha value (updates as slider moves)
+	this.alphaValLabel = addLabelToAlgorithmBar(QuakeHeap.ALPHA.toFixed(2));
 }
 
 /********************************************************************
@@ -187,6 +205,17 @@ QuakeHeap.prototype.removeSmallestCallback = function(event)
 QuakeHeap.prototype.clearCallback = function(event)
 {
 	this.implementAction(this.clear.bind(this), "");
+}
+
+QuakeHeap.prototype.setAlphaCallback = function(event)
+{
+	// convert slider value (1-100) to alpha value (0.51-0.99)
+	var alpha = 0.51 + (this.alphaSlider.value / 100) * (0.99 - 0.51);
+	alpha = Math.round(alpha * 100) / 100;
+
+	// update global alpha variable & label
+	QuakeHeap.ALPHA = alpha;	      
+	this.alphaValLabel.nodeValue = alpha;	
 }
 
 /********************************************************************
@@ -430,7 +459,7 @@ QuakeHeap.prototype.Quake = function()
 	var levels = Object.keys(nodesPerLevel);
 	var quake_level = -1;
 	for (var i = 0; i < levels.length - 1; i++) {
-		if (nodesPerLevel[i + 1].length > this.alpha * nodesPerLevel[i].length) {
+		if (nodesPerLevel[i + 1].length > QuakeHeap.ALPHA * nodesPerLevel[i].length) {
 			quake_level = i;
 			break;
 		}
